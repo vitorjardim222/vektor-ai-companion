@@ -40,6 +40,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+
 import {
   Tooltip,
   TooltipContent,
@@ -299,18 +301,22 @@ function ConversationsPage() {
 
   return (
     <TooltipProvider delayDuration={150}>
-      <div className="grid h-screen w-full min-w-0 grid-cols-[420px_minmax(0,1fr)] overflow-hidden bg-background">
+      <div className="grid h-screen w-full min-w-0 grid-cols-[400px_minmax(0,1fr)] overflow-hidden bg-background lg:grid-cols-[400px_minmax(0,1fr)_340px]">
         {/* LEFT — conversation list */}
         <aside className="flex min-w-0 flex-col border-r border-border bg-sidebar/40">
           <div className="space-y-3 border-b border-border px-3 py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="font-display text-lg font-semibold tracking-tight">Inbox</h1>
-                <p className="text-xs text-muted-foreground">
-                  {CONVERSATIONS.reduce((a, c) => a + c.unread, 0)} não lidas ·{" "}
-                  {CONVERSATIONS.length} conversas
-                </p>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex min-w-0 items-center gap-2">
+                <SidebarTrigger className="h-8 w-8 shrink-0" />
+                <div className="min-w-0">
+                  <h1 className="font-display text-lg font-semibold tracking-tight">Inbox</h1>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {CONVERSATIONS.reduce((a, c) => a + c.unread, 0)} não lidas ·{" "}
+                    {CONVERSATIONS.length} conversas
+                  </p>
+                </div>
               </div>
+
               <div className="flex gap-1">
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -496,13 +502,14 @@ function ConversationsPage() {
               </Tooltip>
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-9 gap-1.5">
+                  <Button variant="outline" size="sm" className="h-9 gap-1.5 lg:hidden">
                     <PanelRightOpen className="h-4 w-4" />
                     Detalhes do cliente
                   </Button>
                 </SheetTrigger>
                 <CustomerDetailsSheet active={active} />
               </Sheet>
+
               <Button variant="ghost" size="icon" className="h-9 w-9">
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
@@ -669,9 +676,13 @@ function ConversationsPage() {
           </div>
         </section>
 
-        {/* Customer details now in slide-over — see CustomerDetailsSheet */}
+        {/* RIGHT — customer details (fixed on desktop) */}
+        <aside className="hidden min-w-0 flex-col border-l border-border bg-sidebar/40 lg:flex">
+          <CustomerDetailsPanel active={active} />
+        </aside>
       </div>
     </TooltipProvider>
+
   );
 }
 
@@ -686,120 +697,140 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
+function CustomerDetailsBody({ active }: { active: Conversation }) {
+  return (
+    <div className="space-y-5 p-5">
+      <div className="flex flex-col items-center text-center">
+        <Avatar className="h-16 w-16">
+          <AvatarFallback className="bg-gradient-to-br from-primary/40 to-accent/40 text-base font-semibold">
+            {active.initials}
+          </AvatarFallback>
+        </Avatar>
+        <h3 className="mt-3 font-display text-base font-semibold">{active.name}</h3>
+        <p className="text-xs text-muted-foreground">{active.phone}</p>
+        <div className="mt-3 flex gap-1">
+          <Button variant="outline" size="sm" className="h-7 gap-1 text-xs">
+            <Star className="h-3 w-3" /> Favoritar
+          </Button>
+          <Button variant="outline" size="sm" className="h-7 gap-1 text-xs">
+            <UserPlus className="h-3 w-3" /> Atribuir
+          </Button>
+        </div>
+      </div>
+
+      <Separator />
+
+      <Section title="Status do lead">
+        <button className="flex w-full items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm">
+          <span className={cn("rounded-full border px-2 py-0.5 text-xs", STATUS_COLOR[active.status])}>
+            {STATUS_LABEL[active.status]}
+          </span>
+          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+        </button>
+        <div className="mt-2 grid grid-cols-5 gap-1">
+          {(["novo", "qualificado", "negociacao", "ganho", "perdido"] as Status[]).map(
+            (s, i, arr) => {
+              const activeIdx = arr.indexOf(active.status);
+              return (
+                <div
+                  key={s}
+                  className={cn(
+                    "h-1.5 rounded-full",
+                    i <= activeIdx ? "bg-gradient-to-r from-primary to-accent" : "bg-muted",
+                  )}
+                />
+              );
+            },
+          )}
+        </div>
+      </Section>
+
+      <Section title="Tags">
+        <div className="flex flex-wrap gap-1.5">
+          {active.tags.map((t) => (
+            <span
+              key={t}
+              className="rounded-full border border-accent/30 bg-accent/10 px-2 py-0.5 text-[11px] text-accent"
+            >
+              {t}
+            </span>
+          ))}
+          <button className="rounded-full border border-dashed border-border px-2 py-0.5 text-[11px] text-muted-foreground hover:bg-muted/40">
+            + adicionar
+          </button>
+        </div>
+      </Section>
+
+      <Section title="Origem do lead">
+        <p className="text-sm text-foreground">{active.source}</p>
+      </Section>
+
+      <Section title="Notas internas">
+        <Textarea
+          defaultValue={active.notes}
+          placeholder="Escreva uma nota visível apenas para o time…"
+          className="min-h-[80px] resize-none text-sm"
+        />
+      </Section>
+
+      <Section title="Últimas interações">
+        <ul className="space-y-2">
+          {active.lastInteractions.map((i, k) => (
+            <li key={k} className="flex items-start gap-2 text-xs">
+              <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+              <div className="flex-1">
+                <p className="text-foreground">{i.label}</p>
+                <p className="text-muted-foreground">{i.time}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      <Section title="Histórico de automações">
+        <ul className="space-y-2">
+          {active.automations.map((a, k) => (
+            <li
+              key={k}
+              className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-3 py-2 text-xs"
+            >
+              <span className="flex items-center gap-2 text-foreground">
+                <Zap className="h-3 w-3 text-accent" />
+                {a.label}
+              </span>
+              <span className="text-muted-foreground">{a.time}</span>
+            </li>
+          ))}
+          {active.automations.length === 0 && (
+            <p className="text-xs text-muted-foreground">Nenhuma automação executada.</p>
+          )}
+        </ul>
+      </Section>
+    </div>
+  );
+}
+
+function CustomerDetailsPanel({ active }: { active: Conversation }) {
+  return (
+    <>
+      <div className="border-b border-border px-5 py-4">
+        <h3 className="font-display text-base font-semibold">Detalhes do cliente</h3>
+      </div>
+      <ScrollArea className="flex-1">
+        <CustomerDetailsBody active={active} />
+      </ScrollArea>
+    </>
+  );
+}
+
 function CustomerDetailsSheet({ active }: { active: Conversation }) {
   return (
     <SheetContent side="right" className="w-full overflow-y-auto bg-sidebar/95 p-0 sm:max-w-md">
       <SheetHeader className="border-b border-border px-5 py-4">
         <SheetTitle className="font-display text-base">Detalhes do cliente</SheetTitle>
       </SheetHeader>
-      <div className="space-y-5 p-5">
-        <div className="flex flex-col items-center text-center">
-          <Avatar className="h-16 w-16">
-            <AvatarFallback className="bg-gradient-to-br from-primary/40 to-accent/40 text-base font-semibold">
-              {active.initials}
-            </AvatarFallback>
-          </Avatar>
-          <h3 className="mt-3 font-display text-base font-semibold">{active.name}</h3>
-          <p className="text-xs text-muted-foreground">{active.phone}</p>
-          <div className="mt-3 flex gap-1">
-            <Button variant="outline" size="sm" className="h-7 gap-1 text-xs">
-              <Star className="h-3 w-3" /> Favoritar
-            </Button>
-            <Button variant="outline" size="sm" className="h-7 gap-1 text-xs">
-              <UserPlus className="h-3 w-3" /> Atribuir
-            </Button>
-          </div>
-        </div>
-
-        <Separator />
-
-        <Section title="Status do lead">
-          <button className="flex w-full items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm">
-            <span className={cn("rounded-full border px-2 py-0.5 text-xs", STATUS_COLOR[active.status])}>
-              {STATUS_LABEL[active.status]}
-            </span>
-            <ChevronDown className="h-4 w-4 text-muted-foreground" />
-          </button>
-          <div className="mt-2 grid grid-cols-5 gap-1">
-            {(["novo", "qualificado", "negociacao", "ganho", "perdido"] as Status[]).map(
-              (s, i, arr) => {
-                const activeIdx = arr.indexOf(active.status);
-                return (
-                  <div
-                    key={s}
-                    className={cn(
-                      "h-1.5 rounded-full",
-                      i <= activeIdx ? "bg-gradient-to-r from-primary to-accent" : "bg-muted",
-                    )}
-                  />
-                );
-              },
-            )}
-          </div>
-        </Section>
-
-        <Section title="Tags">
-          <div className="flex flex-wrap gap-1.5">
-            {active.tags.map((t) => (
-              <span
-                key={t}
-                className="rounded-full border border-accent/30 bg-accent/10 px-2 py-0.5 text-[11px] text-accent"
-              >
-                {t}
-              </span>
-            ))}
-            <button className="rounded-full border border-dashed border-border px-2 py-0.5 text-[11px] text-muted-foreground hover:bg-muted/40">
-              + adicionar
-            </button>
-          </div>
-        </Section>
-
-        <Section title="Origem do lead">
-          <p className="text-sm text-foreground">{active.source}</p>
-        </Section>
-
-        <Section title="Notas internas">
-          <Textarea
-            defaultValue={active.notes}
-            placeholder="Escreva uma nota visível apenas para o time…"
-            className="min-h-[80px] resize-none text-sm"
-          />
-        </Section>
-
-        <Section title="Últimas interações">
-          <ul className="space-y-2">
-            {active.lastInteractions.map((i, k) => (
-              <li key={k} className="flex items-start gap-2 text-xs">
-                <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-                <div className="flex-1">
-                  <p className="text-foreground">{i.label}</p>
-                  <p className="text-muted-foreground">{i.time}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </Section>
-
-        <Section title="Histórico de automações">
-          <ul className="space-y-2">
-            {active.automations.map((a, k) => (
-              <li
-                key={k}
-                className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-3 py-2 text-xs"
-              >
-                <span className="flex items-center gap-2 text-foreground">
-                  <Zap className="h-3 w-3 text-accent" />
-                  {a.label}
-                </span>
-                <span className="text-muted-foreground">{a.time}</span>
-              </li>
-            ))}
-            {active.automations.length === 0 && (
-              <p className="text-xs text-muted-foreground">Nenhuma automação executada.</p>
-            )}
-          </ul>
-        </Section>
-      </div>
+      <CustomerDetailsBody active={active} />
     </SheetContent>
   );
 }
+

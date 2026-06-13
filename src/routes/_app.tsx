@@ -12,7 +12,7 @@ function AppLayout() {
   const isConversations = pathname === "/conversations";
 
   return (
-    <SidebarProvider key={isConversations ? "conversations" : "app"} defaultOpen={!isConversations}>
+    <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
         <div className="flex min-w-0 flex-1 flex-col">
@@ -25,3 +25,4 @@ function AppLayout() {
     </SidebarProvider>
   );
 }
+
