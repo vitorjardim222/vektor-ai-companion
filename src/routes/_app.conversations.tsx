@@ -502,13 +502,14 @@ function ConversationsPage() {
               </Tooltip>
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-9 gap-1.5">
+                  <Button variant="outline" size="sm" className="h-9 gap-1.5 lg:hidden">
                     <PanelRightOpen className="h-4 w-4" />
                     Detalhes do cliente
                   </Button>
                 </SheetTrigger>
                 <CustomerDetailsSheet active={active} />
               </Sheet>
+
               <Button variant="ghost" size="icon" className="h-9 w-9">
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
