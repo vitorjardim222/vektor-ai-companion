@@ -1204,11 +1204,11 @@ function IptvPlanDialog({
         </div>
 
         <DialogFooter className="border-t border-white/5 pt-3">
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+          <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={saving}>
             Cancelar
           </Button>
-          <Button onClick={() => draft && onSave(draft)} disabled={!draft.name.trim()}>
-            Salvar plano
+          <Button onClick={() => draft && onSave(draft)} disabled={saving || !draft.name.trim()}>
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar plano"}
           </Button>
         </DialogFooter>
       </DialogContent>
