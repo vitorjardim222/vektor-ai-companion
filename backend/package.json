@@ -1,0 +1,11 @@
+{
+  "name": "vektor-backend",
+  "version": "0.0.0",
+  "private": true,
+  "description": "VEKTOR A.I backend — Fastify + Prisma + BullMQ (phase 2 scaffold)",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  }
+}
