@@ -6,6 +6,7 @@ import {
   Kanban,
   Workflow,
   Bot,
+  Layers,
   Smartphone,
   BarChart3,
   Settings,
