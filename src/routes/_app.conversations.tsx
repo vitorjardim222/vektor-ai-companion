@@ -299,7 +299,7 @@ function ConversationsPage() {
 
   return (
     <TooltipProvider delayDuration={150}>
-      <div className="grid h-screen w-full min-w-0 grid-cols-[280px_minmax(0,1fr)] overflow-hidden bg-background">
+      <div className="grid h-screen w-full min-w-0 grid-cols-[420px_minmax(0,1fr)] overflow-hidden bg-background">
         {/* LEFT — conversation list */}
         <aside className="flex min-w-0 flex-col border-r border-border bg-sidebar/40">
           <div className="space-y-3 border-b border-border px-3 py-4">
