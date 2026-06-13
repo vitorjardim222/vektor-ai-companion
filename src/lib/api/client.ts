@@ -86,3 +86,69 @@ export const healthApi = {
   ping: () => api<{ status: string; service: string; time: string }>("/health"),
   db: () => api<{ status: string; db: string }>("/health/db"),
 };
+
+// ---------- IPTV Plans ----------
+export type IptvPlan = {
+  id: string;
+  organizationId: string;
+  name: string;
+  description: string | null;
+  durationDays: number;
+  price: number | string;
+  currency: string;
+  connectionsLimit: number;
+  trialEnabled: boolean;
+  trialDurationHours: number;
+  active: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type IptvRenewalRule = {
+  id: string;
+  organizationId: string;
+  planId: string | null;
+  reminderDaysBefore: number[];
+  overdueDaysAfter: number[];
+  assignedAiPoolId: string | null;
+  messageTemplate: string | null;
+  active: boolean;
+};
+
+export const iptvApi = {
+  listPlans: (orgId: string) =>
+    api<{ plans: IptvPlan[] }>(`/organizations/${orgId}/iptv-plans`),
+  createPlan: (orgId: string, input: Partial<IptvPlan>) =>
+    api<{ plan: IptvPlan }>(`/organizations/${orgId}/iptv-plans`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    }),
+  updatePlan: (orgId: string, id: string, input: Partial<IptvPlan>) =>
+    api<{ plan: IptvPlan }>(`/organizations/${orgId}/iptv-plans/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    }),
+  deletePlan: (orgId: string, id: string) =>
+    api<{ deleted?: boolean; disabled?: boolean; plan?: IptvPlan }>(
+      `/organizations/${orgId}/iptv-plans/${id}`,
+      { method: "DELETE" },
+    ),
+  reorderPlans: (orgId: string, items: { id: string; sortOrder: number }[]) =>
+    api<{ ok: true }>(`/organizations/${orgId}/iptv-plans/reorder`, {
+      method: "POST",
+      body: JSON.stringify({ items }),
+    }),
+  listRenewalRules: (orgId: string) =>
+    api<{ rules: IptvRenewalRule[] }>(`/organizations/${orgId}/iptv-renewal-rules`),
+  createRenewalRule: (orgId: string, input: Partial<IptvRenewalRule>) =>
+    api<{ rule: IptvRenewalRule }>(`/organizations/${orgId}/iptv-renewal-rules`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    }),
+  updateRenewalRule: (orgId: string, id: string, input: Partial<IptvRenewalRule>) =>
+    api<{ rule: IptvRenewalRule }>(`/organizations/${orgId}/iptv-renewal-rules/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    }),
+};

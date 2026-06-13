@@ -17,6 +17,10 @@ import {
   Bot,
   Calendar,
   XCircle,
+  Tv,
+  Pencil,
+  Trash2,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -302,6 +306,7 @@ function BillingPage() {
           <TabsTrigger value="vencidos">Vencidos</TabsTrigger>
           <TabsTrigger value="pagos">Pagos</TabsTrigger>
           <TabsTrigger value="planos">Planos</TabsTrigger>
+          <TabsTrigger value="iptv">Planos IPTV</TabsTrigger>
           <TabsTrigger value="links">Links</TabsTrigger>
           <TabsTrigger value="automacoes">Automações</TabsTrigger>
         </TabsList>
@@ -352,6 +357,9 @@ function BillingPage() {
                 </Card>
               ))}
             </div>
+          </TabsContent>
+          <TabsContent value="iptv" className="mt-0">
+            <IptvPlansTab />
           </TabsContent>
           <TabsContent value="links" className="mt-0 space-y-2">
             {PAYMENT_LINKS.map((l) => (
@@ -685,6 +693,436 @@ function NewChargeDialog({ onCreate }: { onCreate: (c: Charge) => void }) {
           </Button>
           <Button onClick={submit}>
             <Send className="h-4 w-4" /> Criar cobrança
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ============================================================
+// Planos IPTV — gestão de planos editáveis por tenant
+// ============================================================
+
+type IptvPlanRow = {
+  id: string;
+  name: string;
+  description: string;
+  durationDays: number;
+  price: number;
+  currency: string;
+  connectionsLimit: number;
+  trialEnabled: boolean;
+  trialDurationHours: number;
+  active: boolean;
+  sortOrder: number;
+  assignedAiPoolId: string;
+  reminderDaysBefore: number[];
+  overdueDaysAfter: number[];
+  messageTemplate: string;
+};
+
+const INITIAL_IPTV_PLANS: IptvPlanRow[] = [
+  {
+    id: "iptv1",
+    name: "IPTV Mensal — 1 tela",
+    description: "Acesso completo, qualidade Full HD/4K, 1 conexão simultânea.",
+    durationDays: 30,
+    price: 35,
+    currency: "BRL",
+    connectionsLimit: 1,
+    trialEnabled: true,
+    trialDurationHours: 6,
+    active: true,
+    sortOrder: 1,
+    assignedAiPoolId: "Cobrança Pool",
+    reminderDaysBefore: [7, 3, 1, 0],
+    overdueDaysAfter: [1, 3, 7],
+    messageTemplate: "Olá {{nome}}, seu plano IPTV vence em {{dias}} dias. Renove pelo Pix.",
+  },
+  {
+    id: "iptv2",
+    name: "IPTV Mensal — 2 telas",
+    description: "Pacote família, 2 conexões simultâneas.",
+    durationDays: 30,
+    price: 55,
+    currency: "BRL",
+    connectionsLimit: 2,
+    trialEnabled: true,
+    trialDurationHours: 6,
+    active: true,
+    sortOrder: 2,
+    assignedAiPoolId: "Cobrança Pool",
+    reminderDaysBefore: [7, 3, 1, 0],
+    overdueDaysAfter: [1, 3, 7],
+    messageTemplate: "Olá {{nome}}, seu plano IPTV vence em {{dias}} dias.",
+  },
+  {
+    id: "iptv3",
+    name: "IPTV Trimestral",
+    description: "3 meses com desconto, 1 conexão.",
+    durationDays: 90,
+    price: 95,
+    currency: "BRL",
+    connectionsLimit: 1,
+    trialEnabled: false,
+    trialDurationHours: 0,
+    active: true,
+    sortOrder: 3,
+    assignedAiPoolId: "Cobrança Pool",
+    reminderDaysBefore: [7, 3, 1],
+    overdueDaysAfter: [1, 3],
+    messageTemplate: "Olá {{nome}}, seu plano trimestral está acabando.",
+  },
+  {
+    id: "iptv4",
+    name: "IPTV Anual",
+    description: "12 meses, melhor custo-benefício.",
+    durationDays: 365,
+    price: 340,
+    currency: "BRL",
+    connectionsLimit: 2,
+    trialEnabled: false,
+    trialDurationHours: 0,
+    active: false,
+    sortOrder: 4,
+    assignedAiPoolId: "Vendas Pool",
+    reminderDaysBefore: [30, 7, 1],
+    overdueDaysAfter: [1, 7],
+    messageTemplate: "Olá {{nome}}, sua assinatura anual vence em breve.",
+  },
+];
+
+const POOL_OPTIONS = ["Cobrança Pool", "Vendas Pool", "Suporte Pool", "Renovação Pool"];
+
+function emptyPlan(): IptvPlanRow {
+  return {
+    id: `iptv_${Math.random().toString(36).slice(2, 8)}`,
+    name: "",
+    description: "",
+    durationDays: 30,
+    price: 0,
+    currency: "BRL",
+    connectionsLimit: 1,
+    trialEnabled: false,
+    trialDurationHours: 6,
+    active: true,
+    sortOrder: 99,
+    assignedAiPoolId: "Cobrança Pool",
+    reminderDaysBefore: [7, 3, 1, 0],
+    overdueDaysAfter: [1, 3, 7],
+    messageTemplate: "Olá {{nome}}, seu plano IPTV vence em {{dias}} dias.",
+  };
+}
+
+function IptvPlansTab() {
+  const [plans, setPlans] = useState<IptvPlanRow[]>(INITIAL_IPTV_PLANS);
+  const [editing, setEditing] = useState<IptvPlanRow | null>(null);
+  const [open, setOpen] = useState(false);
+
+  const sorted = useMemo(
+    () => [...plans].sort((a, b) => a.sortOrder - b.sortOrder),
+    [plans],
+  );
+
+  const upsert = (p: IptvPlanRow) => {
+    setPlans((prev) => {
+      const exists = prev.some((x) => x.id === p.id);
+      return exists ? prev.map((x) => (x.id === p.id ? p : x)) : [...prev, p];
+    });
+    setOpen(false);
+    setEditing(null);
+  };
+
+  const toggleActive = (id: string) =>
+    setPlans((prev) => prev.map((p) => (p.id === id ? { ...p, active: !p.active } : p)));
+
+  const remove = (id: string) => setPlans((prev) => prev.filter((p) => p.id !== id));
+
+  const openNew = () => {
+    setEditing(emptyPlan());
+    setOpen(true);
+  };
+  const openEdit = (p: IptvPlanRow) => {
+    setEditing(p);
+    setOpen(true);
+  };
+
+  return (
+    <div className="space-y-4">
+      <Card className="border-white/5 bg-white/[0.02]">
+        <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
+          <div className="flex items-center gap-2">
+            <div className="rounded-lg bg-sky-500/10 p-2 text-sky-300">
+              <Tv className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="text-sm font-medium">Planos IPTV editáveis</div>
+              <div className="text-xs text-muted-foreground">
+                Configure preços, duração, conexões, trial e régua de renovação por plano.
+              </div>
+            </div>
+          </div>
+          <Button onClick={openNew} className="gap-1">
+            <Plus className="h-4 w-4" /> Novo plano IPTV
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card className="border-white/5 bg-white/[0.02]">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-white/5 hover:bg-transparent">
+              <TableHead>Plano</TableHead>
+              <TableHead>Duração</TableHead>
+              <TableHead>Preço</TableHead>
+              <TableHead>Conexões</TableHead>
+              <TableHead>Trial</TableHead>
+              <TableHead>Pool</TableHead>
+              <TableHead>Ativo</TableHead>
+              <TableHead className="text-right">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sorted.map((p) => (
+              <TableRow key={p.id} className="border-white/5">
+                <TableCell>
+                  <div className="font-medium">{p.name}</div>
+                  <div className="line-clamp-1 text-xs text-muted-foreground">{p.description}</div>
+                </TableCell>
+                <TableCell className="text-sm">{p.durationDays} dias</TableCell>
+                <TableCell className="text-sm">{BRL(p.price)}</TableCell>
+                <TableCell className="text-sm">
+                  <span className="inline-flex items-center gap-1">
+                    <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                    {p.connectionsLimit}
+                  </span>
+                </TableCell>
+                <TableCell className="text-sm">
+                  {p.trialEnabled ? (
+                    <Badge className="border border-sky-500/30 bg-sky-500/15 text-sky-300">
+                      {p.trialDurationHours}h
+                    </Badge>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">—</span>
+                  )}
+                </TableCell>
+                <TableCell className="text-xs text-muted-foreground">{p.assignedAiPoolId}</TableCell>
+                <TableCell>
+                  <Switch checked={p.active} onCheckedChange={() => toggleActive(p.id)} />
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button size="sm" variant="ghost" onClick={() => openEdit(p)} className="gap-1">
+                    <Pencil className="h-3.5 w-3.5" /> Editar
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => remove(p.id)}
+                    className="gap-1 text-rose-300 hover:text-rose-200"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+            {sorted.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={8} className="py-10 text-center text-sm text-muted-foreground">
+                  Nenhum plano IPTV criado ainda.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </Card>
+
+      <IptvPlanDialog open={open} onOpenChange={setOpen} value={editing} onSave={upsert} />
+    </div>
+  );
+}
+
+function IptvPlanDialog({
+  open,
+  onOpenChange,
+  value,
+  onSave,
+}: {
+  open: boolean;
+  onOpenChange: (b: boolean) => void;
+  value: IptvPlanRow | null;
+  onSave: (p: IptvPlanRow) => void;
+}) {
+  const [draft, setDraft] = useState<IptvPlanRow | null>(value);
+
+  // Sync when opening with a different value
+  useMemo(() => {
+    setDraft(value);
+  }, [value]);
+
+  if (!draft) return null;
+
+  const set = <K extends keyof IptvPlanRow>(k: K, v: IptvPlanRow[K]) =>
+    setDraft((d) => (d ? { ...d, [k]: v } : d));
+
+  const parseNums = (s: string) =>
+    s
+      .split(",")
+      .map((x) => parseInt(x.trim(), 10))
+      .filter((n) => Number.isFinite(n) && n >= 0);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Tv className="h-4 w-4 text-sky-300" />
+            {value && draft.name ? "Editar plano IPTV" : "Novo plano IPTV"}
+          </DialogTitle>
+          <DialogDescription>
+            Configure os detalhes do plano. As regras de renovação rodam automaticamente quando
+            ativadas.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="flex-1 space-y-4 overflow-y-auto pr-1">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label>Nome do plano</Label>
+              <Input value={draft.name} onChange={(e) => set("name", e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Pool de cobrança</Label>
+              <Select
+                value={draft.assignedAiPoolId}
+                onValueChange={(v) => set("assignedAiPoolId", v)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {POOL_OPTIONS.map((p) => (
+                    <SelectItem key={p} value={p}>
+                      {p}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Descrição</Label>
+            <Textarea
+              value={draft.description}
+              onChange={(e) => set("description", e.target.value)}
+              rows={2}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <div className="space-y-1.5">
+              <Label>Duração (dias)</Label>
+              <Input
+                type="number"
+                min={1}
+                value={draft.durationDays}
+                onChange={(e) => set("durationDays", parseInt(e.target.value || "0", 10))}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Preço (BRL)</Label>
+              <Input
+                type="number"
+                min={0}
+                step="0.01"
+                value={draft.price}
+                onChange={(e) => set("price", parseFloat(e.target.value || "0"))}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Conexões</Label>
+              <Input
+                type="number"
+                min={1}
+                value={draft.connectionsLimit}
+                onChange={(e) => set("connectionsLimit", parseInt(e.target.value || "1", 10))}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Ordem</Label>
+              <Input
+                type="number"
+                value={draft.sortOrder}
+                onChange={(e) => set("sortOrder", parseInt(e.target.value || "0", 10))}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 rounded-lg border border-white/5 bg-background/40 p-3 md:grid-cols-3">
+            <div className="flex items-center justify-between md:col-span-1">
+              <Label className="text-sm">Trial habilitado</Label>
+              <Switch
+                checked={draft.trialEnabled}
+                onCheckedChange={(v) => set("trialEnabled", v)}
+              />
+            </div>
+            <div className="space-y-1.5 md:col-span-1">
+              <Label>Duração do trial (horas)</Label>
+              <Input
+                type="number"
+                min={0}
+                disabled={!draft.trialEnabled}
+                value={draft.trialDurationHours}
+                onChange={(e) => set("trialDurationHours", parseInt(e.target.value || "0", 10))}
+              />
+            </div>
+            <div className="flex items-center justify-between md:col-span-1">
+              <Label className="text-sm">Plano ativo</Label>
+              <Switch checked={draft.active} onCheckedChange={(v) => set("active", v)} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label>Lembretes antes do vencimento (dias, separados por vírgula)</Label>
+              <Input
+                value={draft.reminderDaysBefore.join(", ")}
+                onChange={(e) => set("reminderDaysBefore", parseNums(e.target.value))}
+                placeholder="7, 3, 1, 0"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Cobranças após vencimento (dias)</Label>
+              <Input
+                value={draft.overdueDaysAfter.join(", ")}
+                onChange={(e) => set("overdueDaysAfter", parseNums(e.target.value))}
+                placeholder="1, 3, 7"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Mensagem padrão de renovação</Label>
+            <Textarea
+              rows={3}
+              value={draft.messageTemplate}
+              onChange={(e) => set("messageTemplate", e.target.value)}
+              placeholder="Olá {{nome}}, seu plano IPTV vence em {{dias}} dias…"
+            />
+            <p className="text-xs text-muted-foreground">
+              Variáveis: <code>{"{{nome}}"}</code>, <code>{"{{dias}}"}</code>,{" "}
+              <code>{"{{plano}}"}</code>, <code>{"{{valor}}"}</code>.
+            </p>
+          </div>
+        </div>
+
+        <DialogFooter className="border-t border-white/5 pt-3">
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+            Cancelar
+          </Button>
+          <Button onClick={() => draft && onSave(draft)} disabled={!draft.name.trim()}>
+            Salvar plano
           </Button>
         </DialogFooter>
       </DialogContent>
