@@ -10,25 +10,27 @@ export const Route = createFileRoute("/_app")({
 function AppLayout() {
   const pathname = useRouterState({ select: (router) => router.location.pathname });
   const isConversations = pathname === "/conversations";
-  const conversationsViewportStyle = isConversations
-    ? ({ height: "calc(100dvh - 0px)", maxHeight: "calc(100dvh - 0px)" } as const)
-    : undefined;
 
   return (
-    <SidebarProvider className={isConversations ? "min-h-0 overflow-hidden" : undefined}>
+    <SidebarProvider className="min-h-0 overflow-hidden">
       <div
-        className={isConversations ? "flex w-full overflow-hidden bg-background" : "flex min-h-screen w-full bg-background"}
-        style={conversationsViewportStyle}
+        className="flex w-full overflow-hidden bg-background"
+        style={{ height: "100dvh", maxHeight: "100dvh" }}
       >
         <AppSidebar />
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           {!isConversations && <Topbar />}
-          <main className={isConversations ? "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden" : "flex min-w-0 flex-1 flex-col p-6"}>
+          <main
+            className={
+              isConversations
+                ? "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
+                : "min-h-0 min-w-0 flex-1 overflow-y-auto p-6"
+            }
+          >
             <Outlet />
           </main>
         </div>
       </div>
-
     </SidebarProvider>
   );
 }
