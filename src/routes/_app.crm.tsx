@@ -244,6 +244,14 @@ function CrmPage() {
                 <div className="text-sm font-semibold">{totals.openCount}</div>
               </div>
             </div>
+            <Dialog open={workflowOpen} onOpenChange={setWorkflowOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <Workflow className="h-4 w-4" /> Automações
+                </Button>
+              </DialogTrigger>
+              <WorkflowBuilderDialog />
+            </Dialog>
             <Dialog open={newLeadOpen} onOpenChange={setNewLeadOpen}>
               <DialogTrigger asChild>
                 <Button>
@@ -257,6 +265,7 @@ function CrmPage() {
                 }}
               />
             </Dialog>
+
           </div>
         </div>
 
