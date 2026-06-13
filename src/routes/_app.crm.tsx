@@ -455,9 +455,18 @@ function LeadCard({
   );
 }
 
-function LeadDetailsPanel({ lead }: { lead: Lead }) {
+function LeadDetailsPanel({
+  lead,
+  onChangeStage,
+  onClose,
+}: {
+  lead: Lead;
+  onChangeStage: (stage: StageId) => void;
+  onClose: () => void;
+}) {
+  const stageMeta = STAGES.find((s) => s.id === lead.stage);
   return (
-    <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
+    <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-lg">
       <SheetHeader className="shrink-0 border-b border-border/60 p-5">
         <div className="flex items-start gap-3">
           <Avatar className="h-12 w-12 border border-border/60">
@@ -471,6 +480,11 @@ function LeadDetailsPanel({ lead }: { lead: Lead }) {
               <Phone className="h-3 w-3" /> {lead.whatsapp}
             </SheetDescription>
             <div className="mt-2 flex flex-wrap gap-1">
+              {stageMeta && (
+                <span className={cn("rounded border px-1.5 py-0.5 text-[10px]", stageMeta.accent)}>
+                  {stageMeta.title}
+                </span>
+              )}
               <span className={cn("rounded border px-1.5 py-0.5 text-[10px]", SOURCE_COLORS[lead.source])}>
                 {lead.source}
               </span>
@@ -480,23 +494,55 @@ function LeadDetailsPanel({ lead }: { lead: Lead }) {
             </div>
           </div>
         </div>
+
+        <div className="mt-4 grid grid-cols-3 gap-2">
+          <div className="rounded-md border border-border/40 bg-card/40 px-2 py-1.5">
+            <div className="text-[9px] uppercase tracking-wider text-muted-foreground">Valor</div>
+            <div className="text-xs font-semibold text-emerald-300">{formatCurrency(lead.value)}</div>
+          </div>
+          <div className="rounded-md border border-border/40 bg-card/40 px-2 py-1.5">
+            <div className="text-[9px] uppercase tracking-wider text-muted-foreground">Follow-up</div>
+            <div className="truncate text-xs font-semibold">{lead.followUp}</div>
+          </div>
+          <div className="rounded-md border border-border/40 bg-card/40 px-2 py-1.5">
+            <div className="text-[9px] uppercase tracking-wider text-muted-foreground">Pool IA</div>
+            <div className="truncate text-xs font-semibold">{lead.agent}</div>
+          </div>
+        </div>
+
+        <div className="mt-3 flex items-center gap-2">
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Mover estágio</Label>
+          <Select value={lead.stage} onValueChange={(v) => onChangeStage(v as StageId)}>
+            <SelectTrigger className="h-8 flex-1 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {STAGES.map((s) => (
+                <SelectItem key={s.id} value={s.id}>{s.title}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </SheetHeader>
 
       <div className="min-h-0 flex-1 overflow-y-auto p-5">
         <Tabs defaultValue="dados">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="dados">Dados</TabsTrigger>
-            <TabsTrigger value="historico">Histórico</TabsTrigger>
-            <TabsTrigger value="notas">Notas</TabsTrigger>
-            <TabsTrigger value="tarefas">Tarefas</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="dados" className="text-[11px]">Dados</TabsTrigger>
+            <TabsTrigger value="timeline" className="text-[11px]">Timeline</TabsTrigger>
+            <TabsTrigger value="historico" className="text-[11px]">WhatsApp</TabsTrigger>
+            <TabsTrigger value="notas" className="text-[11px]">Notas</TabsTrigger>
+            <TabsTrigger value="tarefas" className="text-[11px]">Tarefas</TabsTrigger>
+            <TabsTrigger value="auto" className="text-[11px]">Auto</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="dados" className="space-y-4">
-            <InfoRow icon={TrendingUp} label="Valor estimado" value={formatCurrency(lead.value)} />
+          <TabsContent value="dados" className="space-y-3">
+            <InfoRow icon={TrendingUp} label="Valor do negócio" value={formatCurrency(lead.value)} />
+            <InfoRow icon={Target} label="Origem" value={lead.source} />
+            <InfoRow icon={User} label="Responsável humano" value={lead.attendant} />
+            <InfoRow icon={Bot} label="Pool IA responsável" value={lead.agent} />
             <InfoRow icon={Calendar} label="Próximo follow-up" value={lead.followUp} />
             <InfoRow icon={Clock} label="Última interação" value={lead.lastInteraction} />
-            <InfoRow icon={User} label="Atendente responsável" value={lead.attendant} />
-            <InfoRow icon={Bot} label="Agente IA / Pool" value={lead.agent} />
             <InfoRow icon={ArrowRight} label="Próxima ação" value={lead.nextAction} />
             <div>
               <div className="mb-2 flex items-center gap-2 text-xs font-medium text-muted-foreground">
@@ -506,19 +552,30 @@ function LeadDetailsPanel({ lead }: { lead: Lead }) {
                 {lead.tags.map((t) => (
                   <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>
                 ))}
+                <Button variant="ghost" size="sm" className="h-6 px-2 text-[10px]">
+                  <Plus className="h-3 w-3" /> Tag
+                </Button>
               </div>
             </div>
-            <Separator />
-            <div>
-              <div className="mb-2 flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                <Workflow className="h-3 w-3" /> Automações ativas
+          </TabsContent>
+
+          <TabsContent value="timeline" className="space-y-3">
+            {[
+              { icon: Trophy, label: "Lead criado via " + lead.source, when: "há 2 dias", color: "text-sky-300" },
+              { icon: Bot, label: lead.agent + " assumiu o atendimento", when: "há 2 dias", color: "text-violet-300" },
+              { icon: MessageSquare, label: "Primeira resposta enviada", when: "há 1 dia", color: "text-emerald-300" },
+              { icon: User, label: lead.attendant + " entrou na conversa", when: "há 5h", color: "text-amber-300" },
+              { icon: Activity, label: "Estágio movido para " + (stageMeta?.title ?? lead.stage), when: lead.lastInteraction, color: "text-primary" },
+              { icon: Zap, label: "Automação 'Follow-up 48h' agendada", when: "agora", color: "text-yellow-300" },
+            ].map((ev, i) => (
+              <div key={i} className="flex gap-3 rounded-lg border border-border/40 bg-card/30 p-2.5">
+                <ev.icon className={cn("h-4 w-4 shrink-0", ev.color)} />
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs">{ev.label}</div>
+                  <div className="text-[10px] text-muted-foreground">{ev.when}</div>
+                </div>
               </div>
-              <div className="space-y-1.5">
-                <AutomationRow name="Boas-vindas WhatsApp" active />
-                <AutomationRow name="Follow-up 48h" active />
-                <AutomationRow name="Reativação 7 dias" />
-              </div>
-            </div>
+            ))}
           </TabsContent>
 
           <TabsContent value="historico" className="space-y-3">
@@ -554,9 +611,9 @@ function LeadDetailsPanel({ lead }: { lead: Lead }) {
 
           <TabsContent value="tarefas" className="space-y-2">
             {[
-              { t: "Enviar proposta personalizada", done: true },
-              { t: "Ligar para confirmar interesse", done: false },
-              { t: "Agendar reunião de fechamento", done: false },
+              { t: "Enviar proposta personalizada", done: true, due: "Ontem" },
+              { t: "Ligar para confirmar interesse", done: false, due: "Hoje, 16h" },
+              { t: "Agendar reunião de fechamento", done: false, due: "Amanhã" },
             ].map((task, i) => (
               <div key={i} className="flex items-center gap-2 rounded-lg border border-border/60 bg-card/40 p-2.5 text-sm">
                 {task.done ? (
@@ -564,27 +621,45 @@ function LeadDetailsPanel({ lead }: { lead: Lead }) {
                 ) : (
                   <ListTodo className="h-4 w-4 text-muted-foreground" />
                 )}
-                <span className={cn(task.done && "line-through text-muted-foreground")}>{task.t}</span>
+                <span className={cn("flex-1", task.done && "line-through text-muted-foreground")}>{task.t}</span>
+                <span className="text-[10px] text-muted-foreground">{task.due}</span>
               </div>
             ))}
             <Button size="sm" variant="outline" className="w-full">
-              <Plus className="h-4 w-4" /> Nova tarefa
+              <Plus className="h-4 w-4" /> Nova tarefa / follow-up
             </Button>
+          </TabsContent>
+
+          <TabsContent value="auto" className="space-y-2">
+            <div className="mb-1 flex items-center gap-2 text-xs font-medium text-muted-foreground">
+              <Workflow className="h-3 w-3" /> Automações ativas neste lead
+            </div>
+            <AutomationRow name="Boas-vindas WhatsApp" trigger="ao entrar em Novo lead" active />
+            <AutomationRow name="Follow-up automático 2h" trigger="sem resposta do lead" active />
+            <AutomationRow name="Reativação 7 dias" trigger="sem interação" />
+            <AutomationRow name="Escalar para humano" trigger="IA falhou 2x" active />
+            <AutomationRow name="Cobrança Pool" trigger="estágio Aguardando pagamento" />
           </TabsContent>
         </Tabs>
       </div>
 
-      <div className="sticky bottom-0 z-10 flex shrink-0 gap-2 border-t border-border/60 bg-background p-4">
-        <Button variant="outline" className="flex-1">
-          <XCircle className="h-4 w-4" /> Marcar perdido
-        </Button>
-        <Button className="flex-1">
-          <ExternalLink className="h-4 w-4" /> Abrir conversa
+      <div className="sticky bottom-0 z-10 shrink-0 space-y-2 border-t border-border/60 bg-background p-4">
+        <div className="flex gap-2">
+          <Button variant="outline" className="flex-1" onClick={() => { onChangeStage("perdido"); onClose(); }}>
+            <XCircle className="h-4 w-4" /> Marcar perdido
+          </Button>
+          <Button variant="outline" className="flex-1 border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/10" onClick={() => { onChangeStage("fechado"); onClose(); }}>
+            <Trophy className="h-4 w-4" /> Fechar venda
+          </Button>
+        </div>
+        <Button className="w-full">
+          <ExternalLink className="h-4 w-4" /> Abrir conversa no WhatsApp
         </Button>
       </div>
     </SheetContent>
   );
 }
+
 
 function InfoRow({ icon: Icon, label, value }: { icon: typeof Phone; label: string; value: string }) {
   return (
