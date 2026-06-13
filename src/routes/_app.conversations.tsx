@@ -301,18 +301,22 @@ function ConversationsPage() {
 
   return (
     <TooltipProvider delayDuration={150}>
-      <div className="grid h-screen w-full min-w-0 grid-cols-[420px_minmax(0,1fr)] overflow-hidden bg-background">
+      <div className="grid h-screen w-full min-w-0 grid-cols-[400px_minmax(0,1fr)] overflow-hidden bg-background lg:grid-cols-[400px_minmax(0,1fr)_340px]">
         {/* LEFT — conversation list */}
         <aside className="flex min-w-0 flex-col border-r border-border bg-sidebar/40">
           <div className="space-y-3 border-b border-border px-3 py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="font-display text-lg font-semibold tracking-tight">Inbox</h1>
-                <p className="text-xs text-muted-foreground">
-                  {CONVERSATIONS.reduce((a, c) => a + c.unread, 0)} não lidas ·{" "}
-                  {CONVERSATIONS.length} conversas
-                </p>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex min-w-0 items-center gap-2">
+                <SidebarTrigger className="h-8 w-8 shrink-0" />
+                <div className="min-w-0">
+                  <h1 className="font-display text-lg font-semibold tracking-tight">Inbox</h1>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {CONVERSATIONS.reduce((a, c) => a + c.unread, 0)} não lidas ·{" "}
+                    {CONVERSATIONS.length} conversas
+                  </p>
+                </div>
               </div>
+
               <div className="flex gap-1">
                 <Tooltip>
                   <TooltipTrigger asChild>
