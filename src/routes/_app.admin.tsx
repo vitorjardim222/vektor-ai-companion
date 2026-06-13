@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_app/admin")({
     <ModulePlaceholder
       icon={ShieldCheck}
       title="Super Admin"
-      description="Tenants, usage, limits, billing and global system monitoring."
+      description="Tenants, consumo, limites, faturamento e monitoramento global do sistema."
     />
   ),
 });

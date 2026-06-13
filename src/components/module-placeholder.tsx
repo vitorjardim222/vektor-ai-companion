@@ -8,7 +8,7 @@ interface Props {
   cta?: string;
 }
 
-export function ModulePlaceholder({ icon: Icon, title, description, cta = "Coming soon" }: Props) {
+export function ModulePlaceholder({ icon: Icon, title, description, cta = "Em breve" }: Props) {
   return (
     <div className="flex flex-1 flex-col">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
@@ -27,10 +27,10 @@ export function ModulePlaceholder({ icon: Icon, title, description, cta = "Comin
           <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-card shadow-[var(--shadow-glow)]">
             <Icon className="h-6 w-6 text-accent" />
           </div>
-          <h3 className="font-display text-lg font-semibold">Module ready for build</h3>
+          <h3 className="font-display text-lg font-semibold">Módulo pronto para evolução</h3>
           <p className="mt-2 text-sm text-muted-foreground">
-            This surface is wired into the VEKTOR core. Real logic, integrations and data flows will be
-            connected in the next phase.
+            Esta tela já está integrada ao núcleo da VEKTOR. As regras de negócio, integrações
+            e fluxos de dados reais serão conectados na próxima fase.
           </p>
         </div>
       </div>

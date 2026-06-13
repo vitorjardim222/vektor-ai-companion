@@ -3,12 +3,12 @@ import { Bot } from "lucide-react";
 import { ModulePlaceholder } from "@/components/module-placeholder";
 
 export const Route = createFileRoute("/_app/agents")({
-  head: () => ({ meta: [{ title: "AI Agents — VEKTOR A.I" }] }),
+  head: () => ({ meta: [{ title: "Agentes IA — VEKTOR A.I" }] }),
   component: () => (
     <ModulePlaceholder
       icon={Bot}
-      title="AI Agents"
-      description="Build and tune AI agents with prompts, memory, fallback and channel routing."
+      title="Agentes IA"
+      description="Crie e ajuste agentes de IA com prompts, memória, fallback e roteamento por canal."
     />
   ),
 });

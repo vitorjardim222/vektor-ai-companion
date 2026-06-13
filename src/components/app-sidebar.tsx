@@ -26,22 +26,22 @@ import {
 import { BrandLogo } from "./brand-logo";
 
 const main = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Conversations", url: "/conversations", icon: MessagesSquare },
-  { title: "Contacts", url: "/contacts", icon: Users },
+  { title: "Painel", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Conversas", url: "/conversations", icon: MessagesSquare },
+  { title: "Contatos", url: "/contacts", icon: Users },
   { title: "CRM", url: "/crm", icon: Kanban },
 ];
 
 const automation = [
-  { title: "Automations", url: "/automations", icon: Workflow },
-  { title: "AI Agents", url: "/agents", icon: Bot },
+  { title: "Automações", url: "/automations", icon: Workflow },
+  { title: "Agentes IA", url: "/agents", icon: Bot },
   { title: "WhatsApp", url: "/whatsapp", icon: Smartphone },
 ];
 
 const insights = [
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
-  { title: "Billing", url: "/billing", icon: CreditCard },
-  { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Financeiro", url: "/billing", icon: CreditCard },
+  { title: "Configurações", url: "/settings", icon: Settings },
   { title: "Admin", url: "/admin", icon: ShieldCheck },
 ];
 
@@ -78,8 +78,8 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent className="gap-2 py-2">
         {renderGroup("Workspace", main)}
-        {renderGroup("Automation", automation)}
-        {renderGroup("System", insights)}
+        {renderGroup("Automação", automation)}
+        {renderGroup("Sistema", insights)}
       </SidebarContent>
     </Sidebar>
   );

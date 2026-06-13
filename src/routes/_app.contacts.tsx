@@ -3,12 +3,12 @@ import { Users } from "lucide-react";
 import { ModulePlaceholder } from "@/components/module-placeholder";
 
 export const Route = createFileRoute("/_app/contacts")({
-  head: () => ({ meta: [{ title: "Contacts — VEKTOR A.I" }] }),
+  head: () => ({ meta: [{ title: "Contatos — VEKTOR A.I" }] }),
   component: () => (
     <ModulePlaceholder
       icon={Users}
-      title="Contacts"
-      description="All contacts across every connected channel, segmented and enriched."
+      title="Contatos"
+      description="Todos os contatos dos seus canais, segmentados e enriquecidos."
     />
   ),
 });

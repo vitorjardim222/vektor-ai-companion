@@ -8,8 +8,8 @@ import { BrandLogo } from "@/components/brand-logo";
 export const Route = createFileRoute("/register")({
   head: () => ({
     meta: [
-      { title: "Create account — VEKTOR A.I" },
-      { name: "description", content: "Start your VEKTOR A.I workspace in minutes." },
+      { title: "Criar conta — VEKTOR A.I" },
+      { name: "description", content: "Crie seu workspace VEKTOR A.I em minutos." },
     ],
   }),
   component: RegisterPage,
@@ -24,10 +24,10 @@ function RegisterPage() {
         <BrandLogo />
         <div className="space-y-4">
           <h2 className="font-display text-4xl font-bold leading-tight">
-            Launch your <span className="brand-gradient-text">AI workspace</span> in minutes.
+            Lance seu <span className="brand-gradient-text">workspace de IA</span> em minutos.
           </h2>
           <p className="max-w-md text-muted-foreground">
-            14-day free trial. No credit card required. Multi-tenant from day one.
+            14 dias de teste grátis. Sem cartão de crédito. Multi-tenant desde o dia um.
           </p>
         </div>
         <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} VEKTOR A.I</p>
@@ -38,36 +38,36 @@ function RegisterPage() {
         <div className="w-full max-w-md">
           <div className="mb-8 lg:hidden"><BrandLogo /></div>
           <div className="rounded-2xl border border-border glass-panel p-8 shadow-[var(--shadow-elevated)]">
-            <h1 className="font-display text-2xl font-bold">Create your account</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Start your 14-day free trial.</p>
+            <h1 className="font-display text-2xl font-bold">Crie sua conta</h1>
+            <p className="mt-1 text-sm text-muted-foreground">Comece seu teste grátis de 14 dias.</p>
 
             <form className="mt-6 space-y-4" onSubmit={(e) => e.preventDefault()}>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Full name</Label>
-                  <Input id="name" placeholder="Ada Lovelace" />
+                  <Label htmlFor="name">Nome completo</Label>
+                  <Input id="name" placeholder="Maria Silva" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="company">Company</Label>
-                  <Input id="company" placeholder="Acme Inc." />
+                  <Label htmlFor="company">Empresa</Label>
+                  <Input id="company" placeholder="Sua empresa" />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Work email</Label>
-                <Input id="email" type="email" placeholder="you@company.com" />
+                <Label htmlFor="email">E-mail corporativo</Label>
+                <Input id="email" type="email" placeholder="voce@empresa.com" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" placeholder="At least 8 characters" />
+                <Label htmlFor="password">Senha</Label>
+                <Input id="password" type="password" placeholder="Mínimo de 8 caracteres" />
               </div>
               <Button asChild className="w-full bg-[var(--gradient-brand)] text-primary-foreground hover:opacity-90">
-                <Link to="/dashboard">Create workspace <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+                <Link to="/dashboard">Criar workspace <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
               </Button>
             </form>
 
             <p className="mt-6 text-center text-sm text-muted-foreground">
-              Already have an account?{" "}
-              <Link to="/login" className="text-accent hover:underline">Sign in</Link>
+              Já tem uma conta?{" "}
+              <Link to="/login" className="text-accent hover:underline">Entrar</Link>
             </p>
           </div>
         </div>
