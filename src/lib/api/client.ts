@@ -152,3 +152,48 @@ export const iptvApi = {
       body: JSON.stringify(input),
     }),
 };
+
+// ---------- Contacts ----------
+export type Contact = {
+  id: string;
+  organizationId: string;
+  name: string;
+  phone: string;
+  email: string | null;
+  avatar: string | null;
+  source: string | null;
+  status: string;
+  tags: string[];
+  notes: string | null;
+  leadStage: string | null;
+  assignedUserId: string | null;
+  assignedAiPoolId: string | null;
+  iptvPlanId: string | null;
+  iptvExpiresAt: string | null;
+  lastInteractionAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export const contactApi = {
+  list: (orgId: string, params?: { q?: string; tag?: string; status?: string }) => {
+    const qs = new URLSearchParams(
+      Object.entries(params ?? {}).filter(([, v]) => v) as [string, string][],
+    ).toString();
+    return api<{ contacts: Contact[] }>(
+      `/organizations/${orgId}/contacts${qs ? `?${qs}` : ""}`,
+    );
+  },
+  create: (orgId: string, input: Partial<Contact>) =>
+    api<{ contact: Contact }>(`/organizations/${orgId}/contacts`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    }),
+  update: (orgId: string, id: string, input: Partial<Contact>) =>
+    api<{ contact: Contact }>(`/organizations/${orgId}/contacts/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    }),
+  remove: (orgId: string, id: string) =>
+    api<{ deleted: true }>(`/organizations/${orgId}/contacts/${id}`, { method: "DELETE" }),
+};
