@@ -1,5 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
+import { ApiError, iptvApi, type IptvPlan } from "@/lib/api/client";
+
 import {
   CreditCard,
   Plus,
@@ -815,47 +821,111 @@ function emptyPlan(): IptvPlanRow {
   };
 }
 
+function backendErrorMessage(err: unknown): string {
+  if (err instanceof ApiError) {
+    if (err.status === 401) return "Sessão expirada. Entre novamente.";
+    if (err.status === 403) return "Sem permissão para esta operação.";
+    if (err.status === 400) return "Dados inválidos.";
+  }
+  return "Backend indisponível. Verifique a API.";
+}
+
+function planFromApi(p: IptvPlan): IptvPlanRow {
+  return {
+    id: p.id,
+    name: p.name,
+    description: p.description ?? "",
+    durationDays: p.durationDays,
+    price: typeof p.price === "string" ? parseFloat(p.price) : p.price,
+    currency: p.currency,
+    connectionsLimit: p.connectionsLimit,
+    trialEnabled: p.trialEnabled,
+    trialDurationHours: p.trialDurationHours,
+    active: p.active,
+    sortOrder: p.sortOrder,
+    assignedAiPoolId: "Cobrança Pool",
+    reminderDaysBefore: [7, 3, 1, 0],
+    overdueDaysAfter: [1, 3, 7],
+    messageTemplate: "Olá {{nome}}, seu plano IPTV vence em {{dias}} dias.",
+  };
+}
+
+function planToApi(p: IptvPlanRow): Partial<IptvPlan> {
+  return {
+    name: p.name,
+    description: p.description || null,
+    durationDays: p.durationDays,
+    price: p.price,
+    currency: p.currency,
+    connectionsLimit: p.connectionsLimit,
+    trialEnabled: p.trialEnabled,
+    trialDurationHours: p.trialDurationHours,
+    active: p.active,
+    sortOrder: p.sortOrder,
+  };
+}
+
 function IptvPlansTab() {
-  const [plans, setPlans] = useState<IptvPlanRow[]>(INITIAL_IPTV_PLANS);
+  const { currentOrgId, ready, isAuthenticated } = useAuth();
+  const qc = useQueryClient();
   const [editing, setEditing] = useState<IptvPlanRow | null>(null);
   const [open, setOpen] = useState(false);
 
-  const sorted = useMemo(
-    () => [...plans].sort((a, b) => a.sortOrder - b.sortOrder),
-    [plans],
-  );
+  const enabled = ready && isAuthenticated && !!currentOrgId;
 
+  const plansQuery = useQuery({
+    queryKey: ["iptv-plans", currentOrgId],
+    enabled,
+    queryFn: () => iptvApi.listPlans(currentOrgId!).then((r) => r.plans.map(planFromApi)),
+  });
+
+  const plans = plansQuery.data ?? [];
+  const sorted = useMemo(() => [...plans].sort((a, b) => a.sortOrder - b.sortOrder), [plans]);
+
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["iptv-plans", currentOrgId] });
+
+  const createMut = useMutation({
+    mutationFn: (p: IptvPlanRow) => iptvApi.createPlan(currentOrgId!, planToApi(p)),
+    onSuccess: () => { toast.success("Plano criado."); setOpen(false); setEditing(null); invalidate(); },
+    onError: (err) => toast.error(backendErrorMessage(err)),
+  });
+
+  const updateMut = useMutation({
+    mutationFn: ({ id, p }: { id: string; p: IptvPlanRow }) =>
+      iptvApi.updatePlan(currentOrgId!, id, planToApi(p)),
+    onSuccess: () => { toast.success("Plano atualizado."); setOpen(false); setEditing(null); invalidate(); },
+    onError: (err) => toast.error(backendErrorMessage(err)),
+  });
+
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => iptvApi.deletePlan(currentOrgId!, id),
+    onSuccess: () => { toast.success("Plano removido."); invalidate(); },
+    onError: (err) => toast.error(backendErrorMessage(err)),
+  });
+
+  const toggleMut = useMutation({
+    mutationFn: ({ id, active }: { id: string; active: boolean }) =>
+      iptvApi.updatePlan(currentOrgId!, id, { active }),
+    onSuccess: () => invalidate(),
+    onError: (err) => toast.error(backendErrorMessage(err)),
+  });
+
+  const saving = createMut.isPending || updateMut.isPending;
   const upsert = (p: IptvPlanRow) => {
-    setPlans((prev) => {
-      const exists = prev.some((x) => x.id === p.id);
-      return exists ? prev.map((x) => (x.id === p.id ? p : x)) : [...prev, p];
-    });
-    setOpen(false);
-    setEditing(null);
+    const existing = plans.some((x) => x.id === p.id);
+    if (existing) updateMut.mutate({ id: p.id, p });
+    else createMut.mutate(p);
   };
 
-  const toggleActive = (id: string) =>
-    setPlans((prev) => prev.map((p) => (p.id === id ? { ...p, active: !p.active } : p)));
-
-  const remove = (id: string) => setPlans((prev) => prev.filter((p) => p.id !== id));
-
-  const openNew = () => {
-    setEditing(emptyPlan());
-    setOpen(true);
-  };
-  const openEdit = (p: IptvPlanRow) => {
-    setEditing(p);
-    setOpen(true);
-  };
+  const openNew = () => { setEditing(emptyPlan()); setOpen(true); };
+  const openEdit = (p: IptvPlanRow) => { setEditing(p); setOpen(true); };
 
   return (
     <div className="space-y-4">
       <Card className="border-white/5 bg-white/[0.02]">
         <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
           <div className="flex items-center gap-2">
-            <div className="rounded-lg bg-sky-500/10 p-2 text-sky-300">
-              <Tv className="h-5 w-5" />
-            </div>
+            <div className="rounded-lg bg-sky-500/10 p-2 text-sky-300"><Tv className="h-5 w-5" /></div>
             <div>
               <div className="text-sm font-medium">Planos IPTV editáveis</div>
               <div className="text-xs text-muted-foreground">
@@ -863,95 +933,111 @@ function IptvPlansTab() {
               </div>
             </div>
           </div>
-          <Button onClick={openNew} className="gap-1">
+          <Button onClick={openNew} className="gap-1" disabled={!currentOrgId}>
             <Plus className="h-4 w-4" /> Novo plano IPTV
           </Button>
         </CardContent>
       </Card>
 
       <Card className="border-white/5 bg-white/[0.02]">
-        <Table>
-          <TableHeader>
-            <TableRow className="border-white/5 hover:bg-transparent">
-              <TableHead>Plano</TableHead>
-              <TableHead>Duração</TableHead>
-              <TableHead>Preço</TableHead>
-              <TableHead>Conexões</TableHead>
-              <TableHead>Trial</TableHead>
-              <TableHead>Pool</TableHead>
-              <TableHead>Ativo</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sorted.map((p) => (
-              <TableRow key={p.id} className="border-white/5">
-                <TableCell>
-                  <div className="font-medium">{p.name}</div>
-                  <div className="line-clamp-1 text-xs text-muted-foreground">{p.description}</div>
-                </TableCell>
-                <TableCell className="text-sm">{p.durationDays} dias</TableCell>
-                <TableCell className="text-sm">{BRL(p.price)}</TableCell>
-                <TableCell className="text-sm">
-                  <span className="inline-flex items-center gap-1">
-                    <Users className="h-3.5 w-3.5 text-muted-foreground" />
-                    {p.connectionsLimit}
-                  </span>
-                </TableCell>
-                <TableCell className="text-sm">
-                  {p.trialEnabled ? (
-                    <Badge className="border border-sky-500/30 bg-sky-500/15 text-sky-300">
-                      {p.trialDurationHours}h
-                    </Badge>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">—</span>
-                  )}
-                </TableCell>
-                <TableCell className="text-xs text-muted-foreground">{p.assignedAiPoolId}</TableCell>
-                <TableCell>
-                  <Switch checked={p.active} onCheckedChange={() => toggleActive(p.id)} />
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button size="sm" variant="ghost" onClick={() => openEdit(p)} className="gap-1">
-                    <Pencil className="h-3.5 w-3.5" /> Editar
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => remove(p.id)}
-                    className="gap-1 text-rose-300 hover:text-rose-200"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </TableCell>
+        {plansQuery.isError ? (
+          <div className="flex items-center gap-2 p-6 text-sm text-rose-300">
+            <AlertTriangle className="h-4 w-4" /> Backend indisponível. Verifique a API.
+            <Button size="sm" variant="ghost" onClick={() => plansQuery.refetch()}>Tentar de novo</Button>
+          </div>
+        ) : plansQuery.isLoading ? (
+          <div className="flex items-center gap-2 p-6 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" /> Carregando planos…
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow className="border-white/5 hover:bg-transparent">
+                <TableHead>Plano</TableHead>
+                <TableHead>Duração</TableHead>
+                <TableHead>Preço</TableHead>
+                <TableHead>Conexões</TableHead>
+                <TableHead>Trial</TableHead>
+                <TableHead>Pool</TableHead>
+                <TableHead>Ativo</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
               </TableRow>
-            ))}
-            {sorted.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={8} className="py-10 text-center text-sm text-muted-foreground">
-                  Nenhum plano IPTV criado ainda.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {sorted.map((p) => (
+                <TableRow key={p.id} className="border-white/5">
+                  <TableCell>
+                    <div className="font-medium">{p.name}</div>
+                    <div className="line-clamp-1 text-xs text-muted-foreground">{p.description}</div>
+                  </TableCell>
+                  <TableCell className="text-sm">{p.durationDays} dias</TableCell>
+                  <TableCell className="text-sm">{BRL(p.price)}</TableCell>
+                  <TableCell className="text-sm">
+                    <span className="inline-flex items-center gap-1">
+                      <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                      {p.connectionsLimit}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    {p.trialEnabled ? (
+                      <Badge className="border border-sky-500/30 bg-sky-500/15 text-sky-300">
+                        {p.trialDurationHours}h
+                      </Badge>
+                    ) : (<span className="text-xs text-muted-foreground">—</span>)}
+                  </TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{p.assignedAiPoolId}</TableCell>
+                  <TableCell>
+                    <Switch
+                      checked={p.active}
+                      disabled={toggleMut.isPending}
+                      onCheckedChange={(v) => toggleMut.mutate({ id: p.id, active: v })}
+                    />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button size="sm" variant="ghost" onClick={() => openEdit(p)} className="gap-1">
+                      <Pencil className="h-3.5 w-3.5" /> Editar
+                    </Button>
+                    <Button
+                      size="sm" variant="ghost"
+                      disabled={deleteMut.isPending}
+                      onClick={() => { if (confirm(`Remover ${p.name}?`)) deleteMut.mutate(p.id); }}
+                      className="gap-1 text-rose-300 hover:text-rose-200"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {sorted.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={8} className="py-10 text-center text-sm text-muted-foreground">
+                    Nenhum plano IPTV criado ainda.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        )}
       </Card>
 
-      <IptvPlanDialog open={open} onOpenChange={setOpen} value={editing} onSave={upsert} />
+      <IptvPlanDialog open={open} onOpenChange={(b) => { if (!saving) setOpen(b); }} value={editing} onSave={upsert} saving={saving} />
     </div>
   );
 }
+
 
 function IptvPlanDialog({
   open,
   onOpenChange,
   value,
   onSave,
+  saving = false,
 }: {
   open: boolean;
   onOpenChange: (b: boolean) => void;
   value: IptvPlanRow | null;
   onSave: (p: IptvPlanRow) => void;
+  saving?: boolean;
 }) {
   const [draft, setDraft] = useState<IptvPlanRow | null>(value);
 
@@ -1118,11 +1204,11 @@ function IptvPlanDialog({
         </div>
 
         <DialogFooter className="border-t border-white/5 pt-3">
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+          <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={saving}>
             Cancelar
           </Button>
-          <Button onClick={() => draft && onSave(draft)} disabled={!draft.name.trim()}>
-            Salvar plano
+          <Button onClick={() => draft && onSave(draft)} disabled={saving || !draft.name.trim()}>
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar plano"}
           </Button>
         </DialogFooter>
       </DialogContent>

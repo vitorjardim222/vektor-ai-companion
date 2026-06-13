@@ -1,11 +1,16 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BrandLogo } from "@/components/brand-logo";
+import { useAuth } from "@/lib/auth-context";
+import { ApiError } from "@/lib/api/client";
 
 export const Route = createFileRoute("/register")({
+  ssr: false,
   head: () => ({
     meta: [
       { title: "Criar conta — VEKTOR A.I" },
@@ -16,6 +21,41 @@ export const Route = createFileRoute("/register")({
 });
 
 function RegisterPage() {
+  const navigate = useNavigate();
+  const { register } = useAuth();
+  const [name, setName] = useState("");
+  const [organizationName, setOrganizationName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !email || !password || !organizationName) return;
+    if (password.length < 8) {
+      toast.error("A senha precisa de pelo menos 8 caracteres.");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await register({ name, email, password, organizationName });
+      toast.success("Workspace criado!");
+      navigate({ to: "/dashboard", replace: true });
+    } catch (err) {
+      const msg =
+        err instanceof ApiError
+          ? err.status === 409
+            ? "E-mail já cadastrado."
+            : err.status >= 500
+              ? "Backend indisponível. Verifique a API."
+              : "Dados inválidos."
+          : "Backend indisponível. Verifique a API.";
+      toast.error(msg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className="relative grid min-h-screen overflow-hidden lg:grid-cols-2">
       <div className="relative hidden flex-col justify-between overflow-hidden border-r border-border bg-sidebar p-10 lg:flex">
@@ -41,27 +81,27 @@ function RegisterPage() {
             <h1 className="font-display text-2xl font-bold">Crie sua conta</h1>
             <p className="mt-1 text-sm text-muted-foreground">Comece seu teste grátis de 14 dias.</p>
 
-            <form className="mt-6 space-y-4" onSubmit={(e) => e.preventDefault()}>
+            <form className="mt-6 space-y-4" onSubmit={onSubmit}>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label htmlFor="name">Nome completo</Label>
-                  <Input id="name" placeholder="Maria Silva" />
+                  <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Maria Silva" required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="company">Empresa</Label>
-                  <Input id="company" placeholder="Sua empresa" />
+                  <Input id="company" value={organizationName} onChange={(e) => setOrganizationName(e.target.value)} placeholder="Sua empresa" required />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">E-mail corporativo</Label>
-                <Input id="email" type="email" placeholder="voce@empresa.com" />
+                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@empresa.com" required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Senha</Label>
-                <Input id="password" type="password" placeholder="Mínimo de 8 caracteres" />
+                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mínimo de 8 caracteres" required />
               </div>
-              <Button asChild className="w-full cta-primary">
-                <Link to="/dashboard">Criar workspace <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+              <Button type="submit" disabled={submitting} className="w-full cta-primary">
+                {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Criar workspace <ArrowRight className="ml-1.5 h-4 w-4" /></>}
               </Button>
             </form>
 

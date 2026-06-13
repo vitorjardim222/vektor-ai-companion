@@ -1,11 +1,16 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { createFileRoute, Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BrandLogo } from "@/components/brand-logo";
+import { useAuth } from "@/lib/auth-context";
+import { ApiError } from "@/lib/api/client";
 
 export const Route = createFileRoute("/login")({
+  ssr: false,
   head: () => ({
     meta: [
       { title: "Entrar — VEKTOR A.I" },
@@ -16,6 +21,42 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
+  const navigate = useNavigate();
+  const { login, isAuthenticated, ready } = useAuth();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (ready && isAuthenticated && pathname === "/login") {
+      navigate({ to: "/dashboard", replace: true });
+    }
+  }, [ready, isAuthenticated, pathname, navigate]);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) return;
+    setSubmitting(true);
+    try {
+      await login(email, password);
+      toast.success("Login realizado");
+      navigate({ to: "/dashboard", replace: true });
+    } catch (err) {
+      const msg =
+        err instanceof ApiError
+          ? err.status === 401
+            ? "E-mail ou senha inválidos."
+            : err.status >= 500
+              ? "Backend indisponível. Verifique a API."
+              : "Não foi possível entrar."
+          : "Backend indisponível. Verifique a API.";
+      toast.error(msg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className="relative grid min-h-screen overflow-hidden lg:grid-cols-2">
       <div className="relative hidden flex-col justify-between overflow-hidden border-r border-border bg-sidebar p-10 lg:flex">
@@ -41,20 +82,22 @@ function LoginPage() {
             <h1 className="font-display text-2xl font-bold">Bem-vindo de volta</h1>
             <p className="mt-1 text-sm text-muted-foreground">Acesse seu workspace VEKTOR.</p>
 
-            <form className="mt-6 space-y-4" onSubmit={(e) => e.preventDefault()}>
+            <form className="mt-6 space-y-4" onSubmit={onSubmit}>
               <div className="space-y-2">
                 <Label htmlFor="email">E-mail</Label>
-                <Input id="email" type="email" placeholder="voce@empresa.com" autoComplete="email" />
+                <Input id="email" type="email" placeholder="voce@empresa.com" autoComplete="email"
+                  value={email} onChange={(e) => setEmail(e.target.value)} required />
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Senha</Label>
                   <Link to="/login" className="text-xs text-accent hover:underline">Esqueci a senha</Link>
                 </div>
-                <Input id="password" type="password" placeholder="••••••••" autoComplete="current-password" />
+                <Input id="password" type="password" placeholder="••••••••" autoComplete="current-password"
+                  value={password} onChange={(e) => setPassword(e.target.value)} required />
               </div>
-              <Button asChild className="w-full cta-primary">
-                <Link to="/dashboard">Entrar <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+              <Button type="submit" disabled={submitting} className="w-full cta-primary">
+                {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Entrar <ArrowRight className="ml-1.5 h-4 w-4" /></>}
               </Button>
             </form>
 
