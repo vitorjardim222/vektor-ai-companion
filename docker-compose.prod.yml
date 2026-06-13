@@ -1,0 +1,78 @@
+# =============================================================
+# VEKTOR A.I — PRODUCTION (VPS deploy)
+# Reuses existing infra on the VPS:
+#   - PostgreSQL : ic-postgresql-aIFq:5432
+#   - Redis      : ic-redis-zf84:6379
+#   - Evolution  : http://ic-evolutionapi-8nZx:8080
+#
+# Exposes ONLY:
+#   - Frontend : 127.0.0.1:3011  (proxied by OpenResty)
+#   - Backend  : 127.0.0.1:3012  (proxied by OpenResty under /api)
+#
+# Usage on the VPS:
+#   cd /opt/vektor-ai
+#   cp .env.production.example .env
+#   docker compose -f docker-compose.prod.yml up -d --build
+# =============================================================
+
+services:
+  vektor-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: vektor/frontend:prod
+    container_name: vektor-frontend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: 3011
+    # Only expose on localhost — OpenResty will proxy publicly.
+    ports:
+      - "127.0.0.1:3011:3011"
+    depends_on:
+      - vektor-backend
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3011/"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vektor
+      - shared
+
+  vektor-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: vektor/backend:prod
+    container_name: vektor-backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: 3012
+    ports:
+      - "127.0.0.1:3012:3012"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3012/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vektor
+      - shared
+
+networks:
+  vektor:
+    driver: bridge
+  # Pre-existing external network that already contains
+  # ic-postgresql-aIFq, ic-redis-zf84, ic-evolutionapi-8nZx.
+  # Create once on the VPS if it doesn't exist:
+  #   docker network create shared
+  # Then attach the existing containers to it:
+  #   docker network connect shared ic-postgresql-aIFq
+  #   docker network connect shared ic-redis-zf84
+  #   docker network connect shared ic-evolutionapi-8nZx
+  shared:
+    external: true
