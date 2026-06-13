@@ -306,6 +306,7 @@ function BillingPage() {
           <TabsTrigger value="vencidos">Vencidos</TabsTrigger>
           <TabsTrigger value="pagos">Pagos</TabsTrigger>
           <TabsTrigger value="planos">Planos</TabsTrigger>
+          <TabsTrigger value="iptv">Planos IPTV</TabsTrigger>
           <TabsTrigger value="links">Links</TabsTrigger>
           <TabsTrigger value="automacoes">Automações</TabsTrigger>
         </TabsList>
