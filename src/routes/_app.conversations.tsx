@@ -299,7 +299,7 @@ function ConversationsPage() {
 
   return (
     <TooltipProvider delayDuration={150}>
-      <div className="-m-6 flex h-[calc(100vh-3.5rem)] min-w-0 overflow-hidden bg-background">
+      <div className="flex h-screen w-full min-w-0 overflow-hidden bg-background">
         {/* LEFT — conversation list */}
         <aside className="flex w-[280px] max-w-[280px] shrink-0 flex-col border-r border-border bg-sidebar/40">
           <div className="space-y-3 border-b border-border px-3 py-4">
@@ -430,7 +430,7 @@ function ConversationsPage() {
         </aside>
 
         {/* CENTER — active chat */}
-        <section className="flex min-w-0 flex-1 flex-col w-full">
+        <section className="flex min-w-0 flex-1 flex-col w-full overflow-hidden">
           {/* chat header */}
           <header className="flex items-center justify-between gap-3 border-b border-border bg-card/40 px-5 py-3 backdrop-blur">
             <div className="flex min-w-0 items-center gap-3">
@@ -510,7 +510,7 @@ function ConversationsPage() {
           </header>
 
           {/* messages */}
-          <ScrollArea className="min-w-0 flex-1 w-full">
+          <ScrollArea className="flex-1 w-full min-w-0 overflow-hidden">
             <div className="flex w-full min-w-0 flex-col gap-4 px-6 py-8 lg:px-8">
               <div className="self-center rounded-full border border-border bg-muted/40 px-3 py-1 text-[11px] text-muted-foreground">
                 Hoje
@@ -621,7 +621,7 @@ function ConversationsPage() {
           </ScrollArea>
 
           {/* composer */}
-          <div className="border-t border-border bg-card/40 px-5 py-3 backdrop-blur">
+          <div className="w-full shrink-0 border-t border-border bg-card/40 px-5 py-3 backdrop-blur">
             <div className="mb-2 flex items-center gap-2">
               <Button variant="outline" size="sm" className="h-7 gap-1.5 rounded-full text-xs">
                 <Zap className="h-3.5 w-3.5 text-accent" />
