@@ -518,7 +518,7 @@ function ConversationsPage() {
                   >
                     <div
                       className={cn(
-                        "max-w-[78%] rounded-2xl px-4 py-2.5 text-sm shadow-sm",
+                        "max-w-[72%] rounded-2xl px-4 py-3 text-[15px] leading-relaxed shadow-sm",
                         isAI
                           ? "border border-accent/30 bg-accent/10 text-foreground"
                           : isMine
