@@ -1031,11 +1031,13 @@ function IptvPlanDialog({
   onOpenChange,
   value,
   onSave,
+  saving = false,
 }: {
   open: boolean;
   onOpenChange: (b: boolean) => void;
   value: IptvPlanRow | null;
   onSave: (p: IptvPlanRow) => void;
+  saving?: boolean;
 }) {
   const [draft, setDraft] = useState<IptvPlanRow | null>(value);
 
