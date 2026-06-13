@@ -15,6 +15,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppWhatsappRouteImport } from './routes/_app.whatsapp'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
+import { Route as AppPoolsRouteImport } from './routes/_app.pools'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppCrmRouteImport } from './routes/_app.crm'
 import { Route as AppConversationsRouteImport } from './routes/_app.conversations'
@@ -52,6 +53,11 @@ const AppWhatsappRoute = AppWhatsappRouteImport.update({
 const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPoolsRoute = AppPoolsRouteImport.update({
+  id: '/pools',
+  path: '/pools',
   getParentRoute: () => AppRoute,
 } as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
@@ -113,6 +119,7 @@ export interface FileRoutesByFullPath {
   '/conversations': typeof AppConversationsRoute
   '/crm': typeof AppCrmRoute
   '/dashboard': typeof AppDashboardRoute
+  '/pools': typeof AppPoolsRoute
   '/settings': typeof AppSettingsRoute
   '/whatsapp': typeof AppWhatsappRoute
 }
@@ -129,6 +136,7 @@ export interface FileRoutesByTo {
   '/conversations': typeof AppConversationsRoute
   '/crm': typeof AppCrmRoute
   '/dashboard': typeof AppDashboardRoute
+  '/pools': typeof AppPoolsRoute
   '/settings': typeof AppSettingsRoute
   '/whatsapp': typeof AppWhatsappRoute
 }
@@ -147,6 +155,7 @@ export interface FileRoutesById {
   '/_app/conversations': typeof AppConversationsRoute
   '/_app/crm': typeof AppCrmRoute
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/pools': typeof AppPoolsRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/whatsapp': typeof AppWhatsappRoute
 }
@@ -165,6 +174,7 @@ export interface FileRouteTypes {
     | '/conversations'
     | '/crm'
     | '/dashboard'
+    | '/pools'
     | '/settings'
     | '/whatsapp'
   fileRoutesByTo: FileRoutesByTo
@@ -181,6 +191,7 @@ export interface FileRouteTypes {
     | '/conversations'
     | '/crm'
     | '/dashboard'
+    | '/pools'
     | '/settings'
     | '/whatsapp'
   id:
@@ -198,6 +209,7 @@ export interface FileRouteTypes {
     | '/_app/conversations'
     | '/_app/crm'
     | '/_app/dashboard'
+    | '/_app/pools'
     | '/_app/settings'
     | '/_app/whatsapp'
   fileRoutesById: FileRoutesById
@@ -251,6 +263,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/pools': {
+      id: '/_app/pools'
+      path: '/pools'
+      fullPath: '/pools'
+      preLoaderRoute: typeof AppPoolsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/dashboard': {
@@ -329,6 +348,7 @@ interface AppRouteChildren {
   AppConversationsRoute: typeof AppConversationsRoute
   AppCrmRoute: typeof AppCrmRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppPoolsRoute: typeof AppPoolsRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppWhatsappRoute: typeof AppWhatsappRoute
 }
@@ -343,6 +363,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppConversationsRoute: AppConversationsRoute,
   AppCrmRoute: AppCrmRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppPoolsRoute: AppPoolsRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppWhatsappRoute: AppWhatsappRoute,
 }
