@@ -13,15 +13,16 @@ function AppLayout() {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
+      <div className={isConversations ? "flex h-screen w-full overflow-hidden bg-background" : "flex min-h-screen w-full bg-background"}>
         <AppSidebar />
         <div className="flex min-w-0 flex-1 flex-col">
           {!isConversations && <Topbar />}
-          <main className={isConversations ? "flex min-w-0 flex-1 flex-col overflow-hidden" : "flex min-w-0 flex-1 flex-col p-6"}>
+          <main className={isConversations ? "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden" : "flex min-w-0 flex-1 flex-col p-6"}>
             <Outlet />
           </main>
         </div>
       </div>
+
     </SidebarProvider>
   );
 }
