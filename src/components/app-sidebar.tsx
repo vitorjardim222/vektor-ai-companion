@@ -23,6 +23,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 import { BrandLogo } from "./brand-logo";
 
 const main = [
@@ -48,6 +49,7 @@ const insights = [
 export function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isActive = (url: string) => pathname === url;
+  const isConversations = pathname === "/conversations";
 
   const renderGroup = (label: string, items: typeof main) => (
     <SidebarGroup>
@@ -72,11 +74,17 @@ export function AppSidebar() {
   );
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+    <Sidebar
+      collapsible="icon"
+      className={cn(
+        "border-r border-sidebar-border",
+        isConversations && "h-[calc(100dvh-0px)] max-h-[calc(100dvh-0px)] overflow-hidden",
+      )}
+    >
       <SidebarHeader className="border-b border-sidebar-border p-4 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2">
         <BrandLogo />
       </SidebarHeader>
-      <SidebarContent className="gap-2 py-2">
+      <SidebarContent className={cn("gap-2 py-2", isConversations && "overflow-hidden")}>
         {renderGroup("Workspace", main)}
         {renderGroup("Automação", automation)}
         {renderGroup("Sistema", insights)}

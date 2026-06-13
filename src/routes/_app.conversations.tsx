@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
-  Bot,
   CheckCheck,
   ChevronDown,
   Filter,
@@ -18,7 +17,6 @@ import {
   Smile,
   Sparkles,
   Star,
-  Tag,
   UserPlus,
   Users,
   Video,
@@ -286,6 +284,19 @@ function ConversationsPage() {
   const [query, setQuery] = useState("");
   const [draft, setDraft] = useState("");
 
+  useEffect(() => {
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    };
+  }, []);
+
   const filtered = useMemo(() => {
     return CONVERSATIONS.filter((c) => {
       if (query && !c.name.toLowerCase().includes(query.toLowerCase())) return false;
@@ -301,10 +312,13 @@ function ConversationsPage() {
 
   return (
     <TooltipProvider delayDuration={150}>
-      <div className="grid h-full min-h-0 w-full min-w-0 grid-cols-[400px_minmax(0,1fr)] overflow-hidden bg-background lg:grid-cols-[400px_minmax(0,1fr)_340px]">
+      <div
+        className="grid min-h-0 w-full min-w-0 grid-cols-[400px_minmax(0,1fr)] overflow-hidden bg-background lg:grid-cols-[400px_minmax(0,1fr)_340px]"
+        style={{ height: "calc(100dvh - 0px)", maxHeight: "calc(100dvh - 0px)" }}
+      >
         {/* LEFT — conversation list */}
-        <aside className="flex min-w-0 flex-col border-r border-border bg-sidebar/40">
-          <div className="space-y-3 border-b border-border px-3 py-4">
+        <aside className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden border-r border-border bg-sidebar/40">
+          <div className="shrink-0 space-y-3 border-b border-border px-3 py-3">
             <div className="flex items-center justify-between gap-2">
               <div className="flex min-w-0 items-center gap-2">
                 <SidebarTrigger className="h-8 w-8 shrink-0" />
@@ -362,7 +376,7 @@ function ConversationsPage() {
             </Tabs>
           </div>
 
-          <ScrollArea className="flex-1">
+          <ScrollArea className="min-h-0 flex-1 overflow-y-auto">
             <ul className="px-1.5 py-2">
               {filtered.map((c) => {
                 const isActive = c.id === activeId;
@@ -436,12 +450,12 @@ function ConversationsPage() {
         </aside>
 
         {/* CENTER — active chat */}
-        <section className="flex min-w-0 flex-1 flex-col w-full overflow-hidden">
+        <section className="flex h-full min-h-0 min-w-0 w-full flex-col overflow-hidden">
           {/* chat header */}
-          <header className="flex items-center justify-between gap-3 border-b border-border bg-card/40 px-5 py-3 backdrop-blur">
+          <header className="flex max-h-16 shrink-0 items-center justify-between gap-3 border-b border-border bg-card/40 px-4 py-2 backdrop-blur">
             <div className="flex min-w-0 items-center gap-3">
               <div className="relative">
-                <Avatar className="h-10 w-10">
+                <Avatar className="h-9 w-9">
                   <AvatarFallback className="bg-gradient-to-br from-primary/40 to-accent/40 text-xs font-semibold">
                     {active.initials}
                   </AvatarFallback>
@@ -517,8 +531,8 @@ function ConversationsPage() {
           </header>
 
           {/* messages */}
-          <ScrollArea className="flex-1 w-full min-w-0 overflow-hidden">
-            <div className="flex w-full min-w-0 flex-col gap-4 px-6 py-8 lg:px-8">
+          <ScrollArea className="min-h-0 flex-1 w-full min-w-0 overflow-y-auto">
+            <div className="flex w-full min-w-0 flex-col gap-2.5 px-5 py-4 lg:px-6">
               <div className="self-center rounded-full border border-border bg-muted/40 px-3 py-1 text-[11px] text-muted-foreground">
                 Hoje
               </div>
@@ -542,7 +556,7 @@ function ConversationsPage() {
                   >
                     <div
                       className={cn(
-                        "max-w-[72%] rounded-2xl px-4 py-3 text-[15px] leading-relaxed shadow-sm",
+                        "max-w-[72%] rounded-xl px-3 py-2 text-sm leading-snug shadow-sm",
                         isAI
                           ? "border border-accent/30 bg-accent/10 text-foreground"
                           : isMine
@@ -557,9 +571,9 @@ function ConversationsPage() {
                         </div>
                       )}
 
-                      {m.type === "text" && <p className="leading-relaxed">{m.text}</p>}
+                      {m.type === "text" && <p>{m.text}</p>}
 
-                      {m.type === "ai" && <p className="leading-relaxed">{m.text}</p>}
+                      {m.type === "ai" && <p>{m.text}</p>}
 
                       {m.type === "audio" && (
                         <div className="flex items-center gap-3 py-1">
@@ -628,24 +642,9 @@ function ConversationsPage() {
           </ScrollArea>
 
           {/* composer */}
-          <div className="w-full shrink-0 border-t border-border bg-card/40 px-5 py-3 backdrop-blur">
-            <div className="mb-2 flex items-center gap-2">
-              <Button variant="outline" size="sm" className="h-7 gap-1.5 rounded-full text-xs">
-                <Zap className="h-3.5 w-3.5 text-accent" />
-                Respostas rápidas
-              </Button>
-              <Button variant="outline" size="sm" className="h-7 gap-1.5 rounded-full text-xs">
-                <Sparkles className="h-3.5 w-3.5 text-accent" />
-                Sugerir resposta IA
-              </Button>
-              <Button variant="outline" size="sm" className="h-7 gap-1.5 rounded-full text-xs">
-                <Tag className="h-3.5 w-3.5" />
-                Adicionar tag
-              </Button>
-            </div>
-
-            <div className="flex items-end gap-2 rounded-2xl border border-border bg-background/60 px-3 py-2 focus-within:ring-1 focus-within:ring-ring">
-              <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0">
+          <div className="sticky bottom-0 max-h-[78px] w-full shrink-0 overflow-hidden border-t border-border bg-card/40 px-4 py-2 backdrop-blur">
+            <div className="flex items-end gap-2 rounded-xl border border-border bg-background/60 px-2.5 py-1.5 focus-within:ring-1 focus-within:ring-ring">
+              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
                 <Paperclip className="h-4 w-4" />
               </Button>
               <Textarea
@@ -653,31 +652,24 @@ function ConversationsPage() {
                 onChange={(e) => setDraft(e.target.value)}
                 placeholder={`Mensagem para ${active.name.split(" ")[0]}…`}
                 rows={1}
-                className="min-h-[36px] resize-none border-0 bg-transparent p-1.5 text-sm shadow-none focus-visible:ring-0"
+                className="h-8 min-h-8 resize-none overflow-hidden border-0 bg-transparent p-1 text-sm shadow-none focus-visible:ring-0"
               />
-              <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0">
+              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
                 <Smile className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0">
+              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
                 <Mic className="h-4 w-4" />
               </Button>
-              <Button size="icon" className="h-9 w-9 shrink-0 cta-primary">
+              <Button size="icon" className="h-8 w-8 shrink-0 cta-primary">
                 <Send className="h-4 w-4" />
               </Button>
             </div>
 
-            <p className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
-              <span className="flex items-center gap-2">
-                <Bot className="h-3 w-3 text-accent" />
-                Nota interna desativada — esta mensagem será enviada ao contato
-              </span>
-              <span>Enter para enviar · Shift+Enter quebra linha</span>
-            </p>
           </div>
         </section>
 
         {/* RIGHT — customer details (fixed on desktop) */}
-        <aside className="hidden min-w-0 flex-col border-l border-border bg-sidebar/40 lg:flex">
+        <aside className="hidden h-full min-h-0 min-w-0 flex-col overflow-hidden border-l border-border bg-sidebar/40 lg:flex">
           <CustomerDetailsPanel active={active} />
         </aside>
       </div>
@@ -813,10 +805,10 @@ function CustomerDetailsBody({ active }: { active: Conversation }) {
 function CustomerDetailsPanel({ active }: { active: Conversation }) {
   return (
     <>
-      <div className="border-b border-border px-5 py-4">
+      <div className="shrink-0 border-b border-border px-5 py-3">
         <h3 className="font-display text-base font-semibold">Detalhes do cliente</h3>
       </div>
-      <ScrollArea className="flex-1">
+      <ScrollArea className="min-h-0 flex-1 overflow-y-auto">
         <CustomerDetailsBody active={active} />
       </ScrollArea>
     </>
