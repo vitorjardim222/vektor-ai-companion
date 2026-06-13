@@ -16,7 +16,7 @@ export function ModulePlaceholder({ icon: Icon, title, description, cta = "Em br
           <h1 className="font-display text-2xl font-bold tracking-tight">{title}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{description}</p>
         </div>
-        <Button className="bg-[var(--gradient-brand)] text-primary-foreground hover:opacity-90">
+        <Button className="cta-primary">
           {cta}
         </Button>
       </div>

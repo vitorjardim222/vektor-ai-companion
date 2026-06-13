@@ -74,7 +74,7 @@ function Landing() {
           </nav>
           <div className="flex items-center gap-2">
             <Button asChild variant="ghost" size="sm"><Link to="/login">Entrar</Link></Button>
-            <Button asChild size="sm" className="bg-[var(--gradient-brand)] text-primary-foreground hover:opacity-90">
+            <Button asChild size="sm" className="cta-primary">
               <Link to="/register">Começar agora <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link>
             </Button>
           </div>
@@ -181,7 +181,7 @@ function Landing() {
                 <span className="font-display text-4xl font-bold">{p.price}</span>
                 {p.price !== "Sob consulta" && <span className="text-sm text-muted-foreground">/mês</span>}
               </div>
-              <Button asChild className={`mt-6 w-full ${p.featured ? "bg-[var(--gradient-brand)] text-primary-foreground hover:opacity-90" : ""}`} variant={p.featured ? "default" : "outline"}>
+              <Button asChild className={`mt-6 w-full ${p.featured ? "cta-primary" : ""}`} variant={p.featured ? "default" : "outline"}>
                 <Link to="/register">Escolher {p.name}</Link>
               </Button>
               <ul className="mt-6 space-y-3 text-sm">
