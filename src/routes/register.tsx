@@ -31,25 +31,53 @@ function RegisterPage() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !password || !organizationName) return;
-    if (password.length < 8) {
-      toast.error("A senha precisa de pelo menos 8 caracteres.");
-      return;
+    const payload = {
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      password,
+      organizationName: organizationName.trim(),
+    };
+    if (!payload.name) return toast.error("Informe seu nome completo.");
+    if (!payload.organizationName) return toast.error("Informe o nome da empresa.");
+    if (!payload.email) return toast.error("Informe um e-mail válido.");
+    if (password.length < 8) return toast.error("A senha precisa de pelo menos 8 caracteres.");
+
+    if (import.meta.env.DEV) {
+      console.debug("[register] payload keys:", Object.keys(payload));
     }
+
     setSubmitting(true);
     try {
-      await register({ name, email, password, organizationName });
+      await register(payload);
       toast.success("Workspace criado!");
       navigate({ to: "/dashboard", replace: true });
     } catch (err) {
-      const msg =
-        err instanceof ApiError
-          ? err.status === 409
-            ? "E-mail já cadastrado."
-            : err.status >= 500
-              ? "Backend indisponível. Verifique a API."
-              : "Dados inválidos."
-          : "Backend indisponível. Verifique a API.";
+      let msg = "Backend indisponível. Verifique a API.";
+      if (err instanceof ApiError) {
+        if (import.meta.env.DEV) {
+          console.debug("[register] error status:", err.status, "data:", err.data);
+        }
+        const data = err.data as
+          | { error?: string; message?: string; details?: { fieldErrors?: Record<string, string[]> } }
+          | null;
+        if (err.status === 409) msg = "E-mail já cadastrado.";
+        else if (err.status >= 500) msg = "Backend indisponível. Verifique a API.";
+        else if (err.status === 400 && data?.details?.fieldErrors) {
+          const fields = data.details.fieldErrors;
+          const labels: Record<string, string> = {
+            name: "Nome",
+            email: "E-mail",
+            password: "Senha",
+            organizationName: "Empresa",
+          };
+          const parts = Object.entries(fields)
+            .filter(([, v]) => Array.isArray(v) && v.length)
+            .map(([k, v]) => `${labels[k] ?? k}: ${v![0]}`);
+          msg = parts.length ? parts.join(" • ") : data?.message || data?.error || "Dados inválidos.";
+        } else {
+          msg = data?.message || data?.error || "Não foi possível criar o workspace.";
+        }
+      }
       toast.error(msg);
     } finally {
       setSubmitting(false);
