@@ -299,10 +299,10 @@ function ConversationsPage() {
 
   return (
     <TooltipProvider delayDuration={150}>
-      <div className="-m-6 flex h-[calc(100vh-3.5rem)] overflow-hidden bg-background">
+      <div className="-m-6 flex h-[calc(100vh-3.5rem)] min-w-0 overflow-hidden bg-background">
         {/* LEFT — conversation list */}
-        <aside className="flex w-[340px] shrink-0 flex-col border-r border-border bg-sidebar/40">
-          <div className="space-y-3 border-b border-border px-4 py-4">
+        <aside className="flex w-[280px] max-w-[280px] shrink-0 flex-col border-r border-border bg-sidebar/40">
+          <div className="space-y-3 border-b border-border px-3 py-4">
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="font-display text-lg font-semibold tracking-tight">Inbox</h1>
@@ -357,7 +357,7 @@ function ConversationsPage() {
           </div>
 
           <ScrollArea className="flex-1">
-            <ul className="px-2 py-2">
+            <ul className="px-1.5 py-2">
               {filtered.map((c) => {
                 const isActive = c.id === activeId;
                 return (
@@ -365,7 +365,7 @@ function ConversationsPage() {
                     <button
                       onClick={() => setActiveId(c.id)}
                       className={cn(
-                        "group relative flex w-full gap-3 rounded-xl px-2.5 py-2.5 text-left transition",
+                        "group relative flex w-full gap-2.5 rounded-xl px-2 py-2.5 text-left transition",
                         isActive
                           ? "bg-muted/70 ring-1 ring-border"
                           : "hover:bg-muted/40",
@@ -430,7 +430,7 @@ function ConversationsPage() {
         </aside>
 
         {/* CENTER — active chat */}
-        <section className="flex min-w-0 flex-1 flex-col">
+        <section className="flex min-w-0 flex-1 flex-col w-full">
           {/* chat header */}
           <header className="flex items-center justify-between gap-3 border-b border-border bg-card/40 px-5 py-3 backdrop-blur">
             <div className="flex min-w-0 items-center gap-3">
@@ -510,8 +510,8 @@ function ConversationsPage() {
           </header>
 
           {/* messages */}
-          <ScrollArea className="flex-1">
-            <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-8 py-8 2xl:max-w-5xl">
+          <ScrollArea className="min-w-0 flex-1 w-full">
+            <div className="flex w-full min-w-0 flex-col gap-4 px-6 py-8 lg:px-8">
               <div className="self-center rounded-full border border-border bg-muted/40 px-3 py-1 text-[11px] text-muted-foreground">
                 Hoje
               </div>

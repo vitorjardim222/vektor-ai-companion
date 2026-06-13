@@ -12,9 +12,9 @@ function AppLayout() {
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
-        <div className="flex flex-1 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col">
           <Topbar />
-          <main className="flex flex-1 flex-col p-6">
+          <main className="flex min-w-0 flex-1 flex-col p-6">
             <Outlet />
           </main>
         </div>
