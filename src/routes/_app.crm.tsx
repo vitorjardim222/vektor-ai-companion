@@ -22,7 +22,16 @@ import {
   ListTodo,
   Workflow,
   ExternalLink,
+  Activity,
+  Zap,
+  AlertTriangle,
+  Trophy,
+  Trash2,
+  GitBranch,
+  Timer,
+  Target,
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
