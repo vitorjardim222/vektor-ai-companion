@@ -201,3 +201,67 @@ VITE_API_BASE_URL=https://api.seu-dominio.com/api
 ```
 
 Reabra o preview — o banner desaparece quando `GET ${VITE_API_BASE_URL}/health` responde 200.
+
+---
+
+## Deploy em VPS (produção) — reaproveitando infraestrutura existente
+
+VEKTOR roda em containers próprios (`vektor-frontend` em `3011`, `vektor-backend` em `3012`), mas **reusa** o Postgres (`ic-postgresql-aIFq`), Redis (`ic-redis-zf84`) e Evolution API (`ic-evolutionapi-8nZx`) que já estão no VPS. Nada é exposto publicamente — o OpenResty publica tudo via HTTPS.
+
+Arquivos relevantes:
+
+- `docker-compose.prod.yml` — stack de produção (apenas frontend + backend)
+- `.env.production.example` — variáveis com hosts/portas da infra existente
+- `deploy/openresty/vektor.conf` — exemplo de reverse proxy + SSL + WebSocket
+- `deploy/scripts/deploy.sh` — primeiro deploy
+- `deploy/scripts/update.sh` — `git pull` + rebuild + migrate
+- `deploy/scripts/backup.sh` — dump diário do Postgres
+
+### Primeiro deploy
+
+```bash
+ssh root@vps
+git clone https://github.com/SUA-ORG/vektor-ai.git /opt/vektor-ai
+cd /opt/vektor-ai
+cp .env.production.example .env
+# editar .env com senhas reais (POSTGRES_PASSWORD, JWT_SECRET, EVOLUTION_API_KEY, ...)
+
+# rede compartilhada com a infra existente
+docker network create shared 2>/dev/null || true
+docker network connect shared ic-postgresql-aIFq   2>/dev/null || true
+docker network connect shared ic-redis-zf84        2>/dev/null || true
+docker network connect shared ic-evolutionapi-8nZx 2>/dev/null || true
+
+bash deploy/scripts/deploy.sh
+```
+
+OpenResty:
+
+```bash
+cp deploy/openresty/vektor.conf /etc/openresty/conf.d/vektor.conf
+# ajustar server_name e caminhos do certbot
+openresty -t && systemctl reload openresty
+```
+
+### Atualizações via GitHub
+
+```bash
+cd /opt/vektor-ai
+bash deploy/scripts/update.sh
+```
+
+### Backup
+
+```bash
+bash deploy/scripts/backup.sh
+# agendar no cron diário:
+# 0 3 * * * /opt/vektor-ai/deploy/scripts/backup.sh
+```
+
+### Portas
+
+| Serviço          | Porta interna | Exposição                   |
+| ---------------- | ------------- | --------------------------- |
+| vektor-frontend  | 3011          | `127.0.0.1` (OpenResty `/`) |
+| vektor-backend   | 3012          | `127.0.0.1` (OpenResty `/api`) |
+| Postgres / Redis | 5432 / 6379   | nunca expostos              |
