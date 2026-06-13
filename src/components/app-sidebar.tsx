@@ -1,0 +1,86 @@
+import { Link, useRouterState } from "@tanstack/react-router";
+import {
+  LayoutDashboard,
+  MessagesSquare,
+  Users,
+  Kanban,
+  Workflow,
+  Bot,
+  Smartphone,
+  BarChart3,
+  Settings,
+  CreditCard,
+  ShieldCheck,
+} from "lucide-react";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
+import { BrandLogo } from "./brand-logo";
+
+const main = [
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Conversations", url: "/conversations", icon: MessagesSquare },
+  { title: "Contacts", url: "/contacts", icon: Users },
+  { title: "CRM", url: "/crm", icon: Kanban },
+];
+
+const automation = [
+  { title: "Automations", url: "/automations", icon: Workflow },
+  { title: "AI Agents", url: "/agents", icon: Bot },
+  { title: "WhatsApp", url: "/whatsapp", icon: Smartphone },
+];
+
+const insights = [
+  { title: "Analytics", url: "/analytics", icon: BarChart3 },
+  { title: "Billing", url: "/billing", icon: CreditCard },
+  { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Admin", url: "/admin", icon: ShieldCheck },
+];
+
+export function AppSidebar() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isActive = (url: string) => pathname === url;
+
+  const renderGroup = (label: string, items: typeof main) => (
+    <SidebarGroup>
+      <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-muted-foreground/70">
+        {label}
+      </SidebarGroupLabel>
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {items.map((item) => (
+            <SidebarMenuItem key={item.url}>
+              <SidebarMenuButton asChild isActive={isActive(item.url)}>
+                <Link to={item.url} className="flex items-center gap-3">
+                  <item.icon className="h-4 w-4" />
+                  <span>{item.title}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  );
+
+  return (
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+      <SidebarHeader className="border-b border-sidebar-border p-4">
+        <BrandLogo />
+      </SidebarHeader>
+      <SidebarContent className="gap-2 py-2">
+        {renderGroup("Workspace", main)}
+        {renderGroup("Automation", automation)}
+        {renderGroup("System", insights)}
+      </SidebarContent>
+    </Sidebar>
+  );
+}
