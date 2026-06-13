@@ -299,9 +299,9 @@ function ConversationsPage() {
 
   return (
     <TooltipProvider delayDuration={150}>
-      <div className="flex h-screen w-full min-w-0 overflow-hidden bg-background">
+      <div className="grid h-screen w-full min-w-0 grid-cols-[280px_minmax(0,1fr)] overflow-hidden bg-background">
         {/* LEFT — conversation list */}
-        <aside className="flex w-[280px] max-w-[280px] shrink-0 flex-col border-r border-border bg-sidebar/40">
+        <aside className="flex min-w-0 flex-col border-r border-border bg-sidebar/40">
           <div className="space-y-3 border-b border-border px-3 py-4">
             <div className="flex items-center justify-between">
               <div>
@@ -342,14 +342,14 @@ function ConversationsPage() {
             </div>
 
             <Tabs value={filter} onValueChange={setFilter}>
-              <TabsList className="h-8 w-full justify-start gap-1 overflow-x-auto bg-transparent p-0">
+              <TabsList className="h-8 w-full justify-start gap-1 overflow-hidden bg-transparent p-0">
                 {FILTERS.map((f) => (
                   <TabsTrigger
                     key={f}
                     value={f}
-                    className="h-7 rounded-full border border-transparent px-3 text-xs data-[state=active]:border-border data-[state=active]:bg-muted"
+                    className="h-7 min-w-0 flex-1 rounded-full border border-transparent px-2 text-xs data-[state=active]:border-border data-[state=active]:bg-muted"
                   >
-                    {f}
+                      <span className="truncate">{f}</span>
                   </TabsTrigger>
                 ))}
               </TabsList>
