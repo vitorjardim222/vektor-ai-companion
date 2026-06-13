@@ -37,6 +37,7 @@ const main = [
 const automation = [
   { title: "Automações", url: "/automations", icon: Workflow },
   { title: "Agentes IA", url: "/agents", icon: Bot },
+  { title: "Pools IA", url: "/pools", icon: Layers },
   { title: "WhatsApp", url: "/whatsapp", icon: Smartphone },
 ];
 
