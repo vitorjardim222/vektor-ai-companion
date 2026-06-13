@@ -53,7 +53,7 @@ function LoginPage() {
                 </div>
                 <Input id="password" type="password" placeholder="••••••••" autoComplete="current-password" />
               </div>
-              <Button asChild className="w-full bg-[var(--gradient-brand)] text-primary-foreground hover:opacity-90">
+              <Button asChild className="w-full cta-primary">
                 <Link to="/dashboard">Entrar <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
               </Button>
             </form>

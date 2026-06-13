@@ -60,7 +60,7 @@ function RegisterPage() {
                 <Label htmlFor="password">Senha</Label>
                 <Input id="password" type="password" placeholder="Mínimo de 8 caracteres" />
               </div>
-              <Button asChild className="w-full bg-[var(--gradient-brand)] text-primary-foreground hover:opacity-90">
+              <Button asChild className="w-full cta-primary">
                 <Link to="/dashboard">Criar workspace <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
               </Button>
             </form>
