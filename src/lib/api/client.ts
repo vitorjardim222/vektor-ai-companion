@@ -197,3 +197,33 @@ export const contactApi = {
   remove: (orgId: string, id: string) =>
     api<{ deleted: true }>(`/organizations/${orgId}/contacts/${id}`, { method: "DELETE" }),
 };
+
+// ---------- Analytics ----------
+export type AnalyticsOverview = {
+  kpis: {
+    mensagensTotal: number;
+    taxaResolucaoIA: number;
+    taxaHandoffHumano: number;
+    conversaoLeads: number;
+    receitaMensal: number;
+    cobrancasVencidas: number;
+    renovacoesIptv: number;
+    sessoesWhatsappAtivas: number;
+    sucessoAutomacoes: number;
+  };
+  messagesPerDay: { date: string; enviadas: number; recebidas: number }[];
+  leadsBySource: { source: string; value: number }[];
+  funnel: { stage: string; value: number }[];
+  revenueMonthly: { month: string; value: number }[];
+  overdueBilling: { date: string; value: number }[];
+  iptvRenewals: { date: string; renovados: number; vencidos: number }[];
+  agentPerformance: { name: string; atendimentos: number; resolucao: number }[];
+  poolPerformance: { name: string; conversas: number; sucesso: number }[];
+  aiProviderUsage: { provider: string; tokens: number; cost: number }[];
+  whatsappSessions: { name: string; status: string; uptime: number }[];
+};
+
+export const analyticsApi = {
+  overview: (orgId: string) =>
+    api<AnalyticsOverview>(`/organizations/${orgId}/analytics/overview`),
+};
