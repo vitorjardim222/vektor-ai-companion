@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Bot,
   CheckCheck,
@@ -285,6 +285,19 @@ function ConversationsPage() {
   const [filter, setFilter] = useState("Todas");
   const [query, setQuery] = useState("");
   const [draft, setDraft] = useState("");
+
+  useEffect(() => {
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    };
+  }, []);
 
   const filtered = useMemo(() => {
     return CONVERSATIONS.filter((c) => {
