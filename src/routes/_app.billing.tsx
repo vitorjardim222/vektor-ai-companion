@@ -17,6 +17,10 @@ import {
   Bot,
   Calendar,
   XCircle,
+  Tv,
+  Pencil,
+  Trash2,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
