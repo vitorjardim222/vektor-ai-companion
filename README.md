@@ -147,3 +147,34 @@ Never commit `.env` — only `.env.example` is tracked.
 ## License
 
 Proprietary © VEKTOR A.I
+
+---
+
+## Como testar integração real — Fase 1
+
+A Fase 1 ativa autenticação real, organização, **contatos** e **planos IPTV** persistidos no Postgres. WhatsApp, IA, CRM e Automations seguem mockados.
+
+1. Suba a stack completa (Postgres + backend Fastify + frontend):
+
+```bash
+docker compose up -d --build
+```
+
+2. Aplique o schema Prisma:
+
+```bash
+cd backend
+npx prisma migrate dev
+```
+
+3. No frontend (`/register`), crie sua conta e workspace. Você será redirecionado para `/dashboard` com JWT armazenado e organização ativa no topbar.
+
+4. Faça logout pelo botão no topbar e teste novamente em `/login`.
+
+5. Vá em **Financeiro → Planos IPTV** e crie/edite/desative um plano. O dado persiste no Postgres (`IptvPlan`).
+
+6. Vá em **Contatos** e crie um contato com plano IPTV vinculado. Edição, exclusão e busca usam o backend real (`Contact`).
+
+Se o backend estiver fora do ar, a UI mostra **"Backend indisponível. Verifique a API."** — não há fallback silencioso para mock em create/update/delete.
+
+Variável de ambiente do frontend (opcional): `VITE_API_BASE_URL` (padrão `/api`).
