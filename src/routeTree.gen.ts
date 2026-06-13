@@ -13,6 +13,7 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppWorkspaceRouteImport } from './routes/_app.workspace'
 import { Route as AppWhatsappRouteImport } from './routes/_app.whatsapp'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
 import { Route as AppPoolsRouteImport } from './routes/_app.pools'
@@ -44,6 +45,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppWorkspaceRoute = AppWorkspaceRouteImport.update({
+  id: '/workspace',
+  path: '/workspace',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppWhatsappRoute = AppWhatsappRouteImport.update({
   id: '/whatsapp',
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/pools': typeof AppPoolsRoute
   '/settings': typeof AppSettingsRoute
   '/whatsapp': typeof AppWhatsappRoute
+  '/workspace': typeof AppWorkspaceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/pools': typeof AppPoolsRoute
   '/settings': typeof AppSettingsRoute
   '/whatsapp': typeof AppWhatsappRoute
+  '/workspace': typeof AppWorkspaceRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/_app/pools': typeof AppPoolsRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/whatsapp': typeof AppWhatsappRoute
+  '/_app/workspace': typeof AppWorkspaceRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -177,6 +186,7 @@ export interface FileRouteTypes {
     | '/pools'
     | '/settings'
     | '/whatsapp'
+    | '/workspace'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/pools'
     | '/settings'
     | '/whatsapp'
+    | '/workspace'
   id:
     | '__root__'
     | '/'
@@ -212,6 +223,7 @@ export interface FileRouteTypes {
     | '/_app/pools'
     | '/_app/settings'
     | '/_app/whatsapp'
+    | '/_app/workspace'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -250,6 +262,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/workspace': {
+      id: '/_app/workspace'
+      path: '/workspace'
+      fullPath: '/workspace'
+      preLoaderRoute: typeof AppWorkspaceRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/whatsapp': {
       id: '/_app/whatsapp'
@@ -351,6 +370,7 @@ interface AppRouteChildren {
   AppPoolsRoute: typeof AppPoolsRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppWhatsappRoute: typeof AppWhatsappRoute
+  AppWorkspaceRoute: typeof AppWorkspaceRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -366,6 +386,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppPoolsRoute: AppPoolsRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppWhatsappRoute: AppWhatsappRoute,
+  AppWorkspaceRoute: AppWorkspaceRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
