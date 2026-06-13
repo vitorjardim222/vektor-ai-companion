@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BrandLogo } from "@/components/brand-logo";
+import { BackendStatusBanner } from "@/components/backend-status-banner";
 import { useAuth } from "@/lib/auth-context";
 import { ApiError } from "@/lib/api/client";
 
@@ -79,6 +80,7 @@ function LoginPage() {
         <div className="w-full max-w-md">
           <div className="mb-8 lg:hidden"><BrandLogo /></div>
           <div className="rounded-2xl border border-border glass-panel p-8 shadow-[var(--shadow-elevated)]">
+            <BackendStatusBanner />
             <h1 className="font-display text-2xl font-bold">Bem-vindo de volta</h1>
             <p className="mt-1 text-sm text-muted-foreground">Acesse seu workspace VEKTOR.</p>
 

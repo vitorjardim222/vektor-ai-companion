@@ -178,3 +178,26 @@ npx prisma migrate dev
 Se o backend estiver fora do ar, a UI mostra **"Backend indisponível. Verifique a API."** — não há fallback silencioso para mock em create/update/delete.
 
 Variável de ambiente do frontend (opcional): `VITE_API_BASE_URL` (padrão `/api`).
+
+## Backend no preview da Lovable
+
+O preview da Lovable (`*.lovable.app`) **não executa** o backend Fastify — ele só serve o frontend estático. Por isso, chamadas a `/api/*` retornam 404 e o login/registro mostra o banner amarelo "Backend não configurado".
+
+### Testar localmente (Docker)
+
+```bash
+docker compose up -d --build
+cd backend && npx prisma migrate dev
+```
+
+Acesse o frontend em `http://localhost:5173` — o proxy Vite encaminha `/api` para o Fastify em `:3000`.
+
+### Testar no preview da Lovable (backend público)
+
+Publique o backend Fastify em um host público (VPS, Railway, Fly.io, etc.) e configure a variável de ambiente do frontend:
+
+```
+VITE_API_BASE_URL=https://api.seu-dominio.com/api
+```
+
+Reabra o preview — o banner desaparece quando `GET ${VITE_API_BASE_URL}/health` responde 200.
