@@ -74,6 +74,9 @@ model Organization {
   subscriptions Subscription[]
   usageLogs     UsageLog[]
   auditLogs     AuditLog[]
+  iptvPlans         IptvPlan[]
+  iptvCustomerPlans IptvCustomerPlan[]
+  iptvRenewalRules  IptvRenewalRule[]
 }
 
 model Membership {
