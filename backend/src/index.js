@@ -1,12 +1,32 @@
-// VEKTOR A.I — Backend entrypoint (placeholder).
-// Replace with Fastify bootstrap in phase 2.
-import { createServer } from "node:http";
+// VEKTOR A.I — Backend entrypoint (Fastify)
+import Fastify from "fastify";
+import cors from "@fastify/cors";
+import sensible from "@fastify/sensible";
 
-const port = Number(process.env.PORT ?? 4000);
+import { env } from "./env.js";
+import authPlugin from "./plugins/auth.js";
+import healthRoutes from "./routes/health.js";
+import authRoutes from "./routes/auth.js";
+import organizationRoutes from "./routes/organizations.js";
 
-createServer((_req, res) => {
-  res.writeHead(200, { "content-type": "application/json" });
-  res.end(JSON.stringify({ service: "vektor-backend", status: "scaffold" }));
-}).listen(port, () => {
-  console.log(`[vektor-backend] listening on :${port}`);
+const app = Fastify({
+  logger: { level: env.NODE_ENV === "production" ? "info" : "debug" },
 });
+
+await app.register(cors, { origin: true, credentials: true });
+await app.register(sensible);
+await app.register(authPlugin, { secret: env.JWT_SECRET });
+
+await app.register(healthRoutes, { prefix: "/api" });
+await app.register(authRoutes, { prefix: "/api" });
+await app.register(organizationRoutes, { prefix: "/api" });
+
+app.get("/", async () => ({ service: "vektor-backend", status: "ok" }));
+
+try {
+  await app.listen({ port: env.PORT, host: "0.0.0.0" });
+  app.log.info(`[vektor-backend] listening on :${env.PORT}`);
+} catch (err) {
+  app.log.error(err);
+  process.exit(1);
+}
