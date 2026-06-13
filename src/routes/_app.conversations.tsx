@@ -18,7 +18,6 @@ import {
   Smile,
   Sparkles,
   Star,
-  Tag,
   UserPlus,
   Users,
   Video,
@@ -645,21 +644,6 @@ function ConversationsPage() {
 
           {/* composer */}
           <div className="sticky bottom-0 max-h-[78px] w-full shrink-0 overflow-hidden border-t border-border bg-card/40 px-4 py-2 backdrop-blur">
-            <div className="mb-1 flex items-center gap-2">
-              <Button variant="outline" size="sm" className="h-7 gap-1.5 rounded-full text-xs">
-                <Zap className="h-3.5 w-3.5 text-accent" />
-                Respostas rápidas
-              </Button>
-              <Button variant="outline" size="sm" className="h-7 gap-1.5 rounded-full text-xs">
-                <Sparkles className="h-3.5 w-3.5 text-accent" />
-                Sugerir resposta IA
-              </Button>
-              <Button variant="outline" size="sm" className="h-7 gap-1.5 rounded-full text-xs">
-                <Tag className="h-3.5 w-3.5" />
-                Adicionar tag
-              </Button>
-            </div>
-
             <div className="flex items-end gap-2 rounded-xl border border-border bg-background/60 px-2.5 py-1.5 focus-within:ring-1 focus-within:ring-ring">
               <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
                 <Paperclip className="h-4 w-4" />
@@ -682,13 +666,6 @@ function ConversationsPage() {
               </Button>
             </div>
 
-            <p className="mt-1 flex items-center justify-between text-[10px] text-muted-foreground">
-              <span className="flex items-center gap-2">
-                <Bot className="h-3 w-3 text-accent" />
-                Nota interna desativada — esta mensagem será enviada ao contato
-              </span>
-              <span>Enter para enviar · Shift+Enter quebra linha</span>
-            </p>
           </div>
         </section>
 
