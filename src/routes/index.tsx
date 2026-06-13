@@ -94,7 +94,7 @@ function Landing() {
           automações — nativa multi-tenant, white-label e pronta para rodar na sua infraestrutura.
         </p>
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-          <Button asChild size="lg" className="h-12 bg-[var(--gradient-brand)] px-8 text-primary-foreground hover:opacity-90 shadow-[var(--shadow-glow)]">
+          <Button asChild size="lg" className="cta-primary h-12 px-8 text-base">
             <Link to="/register">Começar teste grátis <ArrowRight className="ml-2 h-4 w-4" /></Link>
           </Button>
           <Button asChild size="lg" variant="outline" className="h-12 border-border/60 bg-card/40 px-8 backdrop-blur">
@@ -222,7 +222,7 @@ function Landing() {
           <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
             Coloque a VEKTOR A.I no ar em minutos. Sem cartão de crédito.
           </p>
-          <Button asChild size="lg" className="mt-8 h-12 bg-[var(--gradient-brand)] px-8 text-primary-foreground hover:opacity-90">
+          <Button asChild size="lg" className="cta-primary mt-8 h-12 px-8 text-base">
             <Link to="/register">Começar teste grátis <ArrowRight className="ml-2 h-4 w-4" /></Link>
           </Button>
         </div>
