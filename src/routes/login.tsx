@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BrandLogo } from "@/components/brand-logo";
+import { BackendStatusBanner } from "@/components/backend-status-banner";
 import { useAuth } from "@/lib/auth-context";
 import { ApiError } from "@/lib/api/client";
 
