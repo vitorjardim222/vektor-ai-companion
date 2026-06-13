@@ -3,12 +3,12 @@ import { MessagesSquare } from "lucide-react";
 import { ModulePlaceholder } from "@/components/module-placeholder";
 
 export const Route = createFileRoute("/_app/conversations")({
-  head: () => ({ meta: [{ title: "Conversations — VEKTOR A.I" }] }),
+  head: () => ({ meta: [{ title: "Conversas — VEKTOR A.I" }] }),
   component: () => (
     <ModulePlaceholder
       icon={MessagesSquare}
-      title="Conversations"
-      description="Unified inbox for all WhatsApp sessions, with AI assist and human handoff."
+      title="Conversas"
+      description="Caixa de entrada unificada para todas as sessões de WhatsApp, com assistência por IA e transferência para humano."
     />
   ),
 });

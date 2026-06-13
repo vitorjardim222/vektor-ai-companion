@@ -3,12 +3,12 @@ import { Workflow } from "lucide-react";
 import { ModulePlaceholder } from "@/components/module-placeholder";
 
 export const Route = createFileRoute("/_app/automations")({
-  head: () => ({ meta: [{ title: "Automations — VEKTOR A.I" }] }),
+  head: () => ({ meta: [{ title: "Automações — VEKTOR A.I" }] }),
   component: () => (
     <ModulePlaceholder
       icon={Workflow}
-      title="Automations"
-      description="Visual flows, scheduled campaigns, triggers and rapid replies."
+      title="Automações"
+      description="Fluxos visuais, campanhas agendadas, gatilhos e respostas rápidas."
     />
   ),
 });

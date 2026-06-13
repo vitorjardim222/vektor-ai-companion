@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_app/analytics")({
     <ModulePlaceholder
       icon={BarChart3}
       title="Analytics"
-      description="Conversion, response time, AI vs human resolution and revenue attribution."
+      description="Conversão, tempo de resposta, resolução IA vs humano e atribuição de receita."
     />
   ),
 });
