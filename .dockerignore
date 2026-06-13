@@ -1,0 +1,15 @@
+node_modules
+.git
+.github
+.lovable
+dist
+build
+.output
+.cache
+.vite
+*.log
+.env
+.env.*
+!.env.example
+README.md
+backend/node_modules

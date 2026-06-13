@@ -1,0 +1,76 @@
+# =============================================================
+# VEKTOR A.I — Full stack
+# Boots: frontend + backend + postgres + redis
+# Usage:
+#   cp .env.example .env
+#   docker compose up -d --build
+# =============================================================
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: vektor/frontend:latest
+    container_name: vektor-frontend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      - backend
+    networks: [vektor]
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: vektor/backend:latest
+    container_name: vektor-backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+    ports:
+      - "${BACKEND_PORT:-4000}:4000"
+    depends_on:
+      - postgres
+      - redis
+    networks: [vektor]
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: vektor-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-vektor}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+      POSTGRES_DB: ${POSTGRES_DB:-vektor}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks: [vektor]
+
+  redis:
+    image: redis:7-alpine
+    container_name: vektor-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks: [vektor]
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  vektor:
+    driver: bridge
