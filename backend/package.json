@@ -1,11 +1,30 @@
 {
   "name": "vektor-backend",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
-  "description": "VEKTOR A.I backend — Fastify + Prisma + BullMQ (phase 2 scaffold)",
+  "description": "VEKTOR A.I backend — Fastify + Prisma + BullMQ",
   "type": "module",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "node --watch src/index.js"
+    "dev": "node --watch src/index.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:studio": "prisma studio"
+  },
+  "prisma": {
+    "schema": "prisma/schema.prisma"
+  },
+  "dependencies": {
+    "@fastify/cors": "^9.0.1",
+    "@fastify/jwt": "^8.0.1",
+    "@fastify/sensible": "^5.6.0",
+    "@prisma/client": "^5.22.0",
+    "bcryptjs": "^2.4.3",
+    "fastify": "^4.28.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "prisma": "^5.22.0"
   }
 }
