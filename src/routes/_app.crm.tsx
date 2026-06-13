@@ -368,8 +368,18 @@ function CrmPage() {
       </div>
 
       <Sheet open={!!selectedLead} onOpenChange={(o) => !o && setSelectedLead(null)}>
-        {selectedLead && <LeadDetailsPanel lead={selectedLead} />}
+        {selectedLead && (
+          <LeadDetailsPanel
+            lead={selectedLead}
+            onChangeStage={(stage) => {
+              setLeads((prev) => prev.map((l) => (l.id === selectedLead.id ? { ...l, stage } : l)));
+              setSelectedLead((cur) => (cur ? { ...cur, stage } : cur));
+            }}
+            onClose={() => setSelectedLead(null)}
+          />
+        )}
       </Sheet>
+
     </div>
   );
 }
