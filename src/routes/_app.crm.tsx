@@ -673,12 +673,15 @@ function InfoRow({ icon: Icon, label, value }: { icon: typeof Phone; label: stri
   );
 }
 
-function AutomationRow({ name, active }: { name: string; active?: boolean }) {
+function AutomationRow({ name, trigger, active }: { name: string; trigger?: string; active?: boolean }) {
   return (
-    <div className="flex items-center justify-between rounded-md border border-border/40 bg-card/30 px-3 py-1.5 text-xs">
-      <span>{name}</span>
+    <div className="flex items-center justify-between gap-2 rounded-md border border-border/40 bg-card/30 px-3 py-2 text-xs">
+      <div className="min-w-0 flex-1">
+        <div className="truncate">{name}</div>
+        {trigger && <div className="truncate text-[10px] text-muted-foreground">Gatilho: {trigger}</div>}
+      </div>
       <span className={cn(
-        "rounded px-1.5 py-0.5 text-[10px]",
+        "shrink-0 rounded px-1.5 py-0.5 text-[10px]",
         active ? "bg-emerald-500/10 text-emerald-300 border border-emerald-500/30" : "bg-muted/40 text-muted-foreground",
       )}>
         {active ? "Ativa" : "Pausada"}
@@ -686,6 +689,7 @@ function AutomationRow({ name, active }: { name: string; active?: boolean }) {
     </div>
   );
 }
+
 
 function NewLeadDialog({ onCreate }: { onCreate: (lead: Omit<Lead, "id">) => void }) {
   const [form, setForm] = useState<Omit<Lead, "id">>({
