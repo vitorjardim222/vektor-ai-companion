@@ -182,6 +182,8 @@ function CrmPage() {
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverStage, setDragOverStage] = useState<StageId | null>(null);
   const [newLeadOpen, setNewLeadOpen] = useState(false);
+  const [workflowOpen, setWorkflowOpen] = useState(false);
+
 
   const filteredLeads = useMemo(() => {
     return leads.filter((l) => {
