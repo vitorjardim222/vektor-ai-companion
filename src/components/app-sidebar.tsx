@@ -58,7 +58,7 @@ export function AppSidebar() {
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.url}>
-              <SidebarMenuButton asChild isActive={isActive(item.url)}>
+              <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
                 <Link to={item.url} className="flex items-center gap-3">
                   <item.icon className="h-4 w-4" />
                   <span>{item.title}</span>
@@ -73,7 +73,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
-      <SidebarHeader className="border-b border-sidebar-border p-4">
+      <SidebarHeader className="border-b border-sidebar-border p-4 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2">
         <BrandLogo />
       </SidebarHeader>
       <SidebarContent className="gap-2 py-2">
