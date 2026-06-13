@@ -676,9 +676,13 @@ function ConversationsPage() {
           </div>
         </section>
 
-        {/* Customer details now in slide-over — see CustomerDetailsSheet */}
+        {/* RIGHT — customer details (fixed on desktop) */}
+        <aside className="hidden min-w-0 flex-col border-l border-border bg-sidebar/40 lg:flex">
+          <CustomerDetailsPanel active={active} />
+        </aside>
       </div>
     </TooltipProvider>
+
   );
 }
 
