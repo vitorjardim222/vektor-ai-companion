@@ -23,6 +23,7 @@ await app.register(healthRoutes, { prefix: "/api" });
 await app.register(authRoutes, { prefix: "/api" });
 await app.register(organizationRoutes, { prefix: "/api" });
 await app.register(iptvPlanRoutes, { prefix: "/api" });
+await app.register(contactRoutes, { prefix: "/api" });
 
 app.get("/", async () => ({ service: "vektor-backend", status: "ok" }));
 
