@@ -264,3 +264,50 @@ model Contact {
   @@index([organizationId, status])
   @@index([organizationId, phone])
 }
+
+enum WhatsAppStatus {
+  DISCONNECTED
+  CONNECTING
+  QR
+  CONNECTED
+  ERROR
+}
+
+model WhatsAppSession {
+  id                  String         @id @default(cuid())
+  organizationId      String
+  name                String
+  phoneNumber         String?
+  status              WhatsAppStatus @default(DISCONNECTED)
+  evolutionSessionId  String?        @unique
+  qrCode              String?
+  lastConnectionAt    DateTime?
+  lastMessageAt       DateTime?
+  assignedPoolId      String?
+  assignedHumanId     String?
+  autoReconnect       Boolean        @default(true)
+  active              Boolean        @default(true)
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  organization        Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  events              WhatsAppEvent[]
+
+  @@index([organizationId, status])
+  @@index([organizationId, active])
+}
+
+model WhatsAppEvent {
+  id              String           @id @default(cuid())
+  organizationId  String
+  sessionId       String?
+  type            String
+  payload         Json
+  createdAt       DateTime         @default(now())
+
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  session         WhatsAppSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, type])
+  @@index([sessionId, createdAt])
+}
