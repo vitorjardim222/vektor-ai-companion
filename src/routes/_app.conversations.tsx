@@ -652,7 +652,7 @@ function ConversationsPage() {
                 onChange={(e) => setDraft(e.target.value)}
                 placeholder={`Mensagem para ${active.name.split(" ")[0]}…`}
                 rows={1}
-                className="min-h-[32px] resize-none border-0 bg-transparent p-1 text-sm shadow-none focus-visible:ring-0"
+                className="h-8 min-h-8 resize-none overflow-hidden border-0 bg-transparent p-1 text-sm shadow-none focus-visible:ring-0"
               />
               <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
                 <Smile className="h-4 w-4" />
