@@ -829,10 +829,10 @@ function CustomerDetailsBody({ active }: { active: Conversation }) {
 function CustomerDetailsPanel({ active }: { active: Conversation }) {
   return (
     <>
-      <div className="border-b border-border px-5 py-4">
+      <div className="shrink-0 border-b border-border px-5 py-3">
         <h3 className="font-display text-base font-semibold">Detalhes do cliente</h3>
       </div>
-      <ScrollArea className="flex-1">
+      <ScrollArea className="min-h-0 flex-1 overflow-y-auto">
         <CustomerDetailsBody active={active} />
       </ScrollArea>
     </>
