@@ -107,6 +107,7 @@ function RegisterPage() {
         <div className="w-full max-w-md">
           <div className="mb-8 lg:hidden"><BrandLogo /></div>
           <div className="rounded-2xl border border-border glass-panel p-8 shadow-[var(--shadow-elevated)]">
+            <BackendStatusBanner />
             <h1 className="font-display text-2xl font-bold">Crie sua conta</h1>
             <p className="mt-1 text-sm text-muted-foreground">Comece seu teste grátis de 14 dias.</p>
 
