@@ -8,6 +8,7 @@ import {
   Image as ImageIcon,
   Mic,
   MoreHorizontal,
+  PanelRightOpen,
   Paperclip,
   Phone,
   Pin,
