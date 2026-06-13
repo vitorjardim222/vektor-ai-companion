@@ -757,3 +757,229 @@ function NewLeadDialog({ onCreate }: { onCreate: (lead: Omit<Lead, "id">) => voi
     </DialogContent>
   );
 }
+
+// ====== Workflow Builder ======
+
+type TriggerType =
+  | "stage_enter"
+  | "no_response"
+  | "payment_late"
+  | "lead_replied"
+  | "ai_failed"
+  | "human_takeover";
+
+const TRIGGER_META: Record<TriggerType, { label: string; icon: typeof Zap; color: string }> = {
+  stage_enter:   { label: "Quando entrar no estágio",  icon: GitBranch,     color: "text-sky-300" },
+  no_response:   { label: "Quando ficar sem resposta", icon: Clock,         color: "text-amber-300" },
+  payment_late:  { label: "Quando pagamento atrasar",  icon: AlertTriangle, color: "text-rose-300" },
+  lead_replied:  { label: "Quando lead responder",     icon: MessageSquare, color: "text-emerald-300" },
+  ai_failed:     { label: "Quando IA falhar",          icon: Bot,           color: "text-orange-300" },
+  human_takeover:{ label: "Quando humano assumir",     icon: User,          color: "text-violet-300" },
+};
+
+interface WorkflowStep {
+  id: string;
+  trigger: TriggerType;
+  condition: string;
+  action: string;
+  delay: string;
+  priority: "alta" | "media" | "baixa";
+  active: boolean;
+}
+
+const INITIAL_WORKFLOWS: WorkflowStep[] = [
+  { id: "w1", trigger: "stage_enter",   condition: "estágio = Novo lead",            action: "Ativar Vendas Pool",                delay: "Imediato", priority: "alta",  active: true },
+  { id: "w2", trigger: "stage_enter",   condition: "estágio = Aguardando pagamento", action: "Ativar Cobrança Pool",              delay: "Imediato", priority: "alta",  active: true },
+  { id: "w3", trigger: "no_response",   condition: "sem resposta por 2h",            action: "Enviar follow-up automático",       delay: "2h",       priority: "media", active: true },
+  { id: "w4", trigger: "lead_replied",  condition: "cliente respondeu",              action: "Transferir para humano",            delay: "Imediato", priority: "alta",  active: true },
+  { id: "w5", trigger: "ai_failed",     condition: "IA falhou 2x consecutivas",      action: "Escalar para próximo agente / humano", delay: "Imediato", priority: "alta",  active: true },
+  { id: "w6", trigger: "payment_late",  condition: "pagamento > 3 dias atraso",      action: "Acionar Cobrança Pool + SMS",       delay: "1 dia",    priority: "alta",  active: false },
+];
+
+function WorkflowBuilderDialog() {
+  const [steps, setSteps] = useState<WorkflowStep[]>(INITIAL_WORKFLOWS);
+  const [editing, setEditing] = useState<WorkflowStep | null>(null);
+
+  function toggle(id: string) {
+    setSteps((s) => s.map((w) => (w.id === id ? { ...w, active: !w.active } : w)));
+  }
+  function remove(id: string) {
+    setSteps((s) => s.filter((w) => w.id !== id));
+  }
+
+  return (
+    <DialogContent className="max-w-3xl p-0">
+      <DialogHeader className="p-6 pb-3">
+        <DialogTitle className="flex items-center gap-2">
+          <Workflow className="h-5 w-5 text-primary" /> Construtor de automações
+        </DialogTitle>
+        <DialogDescription>
+          Configure gatilhos, condições e ações para automatizar o pipeline.
+        </DialogDescription>
+      </DialogHeader>
+
+      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-6 pb-4">
+        {editing ? (
+          <WorkflowEditor
+            initial={editing}
+            onCancel={() => setEditing(null)}
+            onSave={(w) => {
+              setSteps((prev) => {
+                const exists = prev.find((p) => p.id === w.id);
+                return exists ? prev.map((p) => (p.id === w.id ? w : p)) : [...prev, w];
+              });
+              setEditing(null);
+            }}
+          />
+        ) : (
+          <>
+            <div className="flex items-center justify-between">
+              <div className="text-xs text-muted-foreground">
+                {steps.length} automações • {steps.filter((s) => s.active).length} ativas
+              </div>
+              <Button
+                size="sm"
+                onClick={() =>
+                  setEditing({
+                    id: "w" + Date.now(),
+                    trigger: "stage_enter",
+                    condition: "",
+                    action: "",
+                    delay: "Imediato",
+                    priority: "media",
+                    active: true,
+                  })
+                }
+              >
+                <Plus className="h-4 w-4" /> Nova automação
+              </Button>
+            </div>
+
+            <div className="space-y-2">
+              {steps.map((w) => {
+                const meta = TRIGGER_META[w.trigger];
+                const Icon = meta.icon;
+                return (
+                  <div key={w.id} className="rounded-lg border border-border/60 bg-card/40 p-3">
+                    <div className="flex items-start gap-3">
+                      <div className={cn("rounded-md border border-border/60 bg-background/60 p-2", meta.color)}>
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-sm font-medium">{meta.label}</span>
+                          <span className={cn(
+                            "rounded border px-1.5 py-0.5 text-[10px]",
+                            PRIORITY_META[w.priority].className,
+                          )}>
+                            {PRIORITY_META[w.priority].label}
+                          </span>
+                          <span className="flex items-center gap-1 rounded border border-border/60 px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                            <Timer className="h-3 w-3" /> {w.delay}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                          <span className="rounded bg-muted/40 px-1.5 py-0.5">SE {w.condition}</span>
+                          <ArrowRight className="h-3 w-3" />
+                          <span className="rounded bg-primary/10 px-1.5 py-0.5 text-primary">ENTÃO {w.action}</span>
+                        </div>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={cn("h-7 text-[11px]", w.active ? "text-emerald-300" : "text-muted-foreground")}
+                          onClick={() => toggle(w.id)}
+                        >
+                          {w.active ? "Ativa" : "Pausada"}
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditing(w)}>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-rose-300" onClick={() => remove(w.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+      </div>
+
+      <DialogFooter className="border-t border-border/60 px-6 py-4">
+        <Button variant="outline">Cancelar</Button>
+        <Button>Salvar automações</Button>
+      </DialogFooter>
+    </DialogContent>
+  );
+}
+
+function WorkflowEditor({
+  initial,
+  onCancel,
+  onSave,
+}: {
+  initial: WorkflowStep;
+  onCancel: () => void;
+  onSave: (w: WorkflowStep) => void;
+}) {
+  const [w, setW] = useState<WorkflowStep>(initial);
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="text-sm font-medium">Editar automação</div>
+        <Button variant="ghost" size="sm" onClick={onCancel}>Voltar</Button>
+      </div>
+      <div className="space-y-1.5">
+        <Label className="text-xs">Gatilho</Label>
+        <Select value={w.trigger} onValueChange={(v) => setW({ ...w, trigger: v as TriggerType })}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {(Object.keys(TRIGGER_META) as TriggerType[]).map((k) => (
+              <SelectItem key={k} value={k}>{TRIGGER_META[k].label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-1.5">
+        <Label className="text-xs">Condição</Label>
+        <Input value={w.condition} onChange={(e) => setW({ ...w, condition: e.target.value })} placeholder="ex: estágio = Novo lead" />
+      </div>
+      <div className="space-y-1.5">
+        <Label className="text-xs">Ação</Label>
+        <Textarea rows={2} value={w.action} onChange={(e) => setW({ ...w, action: e.target.value })} placeholder="ex: Ativar Vendas Pool" />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label className="text-xs">Atraso</Label>
+          <Select value={w.delay} onValueChange={(v) => setW({ ...w, delay: v })}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {["Imediato", "5 min", "30 min", "1h", "2h", "1 dia", "3 dias"].map((d) => (
+                <SelectItem key={d} value={d}>{d}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">Prioridade</Label>
+          <Select value={w.priority} onValueChange={(v) => setW({ ...w, priority: v as WorkflowStep["priority"] })}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="alta">Alta</SelectItem>
+              <SelectItem value="media">Média</SelectItem>
+              <SelectItem value="baixa">Baixa</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <div className="flex justify-end gap-2 pt-2">
+        <Button variant="outline" onClick={onCancel}>Cancelar</Button>
+        <Button onClick={() => onSave(w)} disabled={!w.condition || !w.action}>Salvar</Button>
+      </div>
+    </div>
+  );
+}
