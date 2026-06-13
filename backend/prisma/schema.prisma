@@ -28,6 +28,13 @@ enum SubscriptionStatus {
   PAUSED
 }
 
+enum IptvCustomerPlanStatus {
+  ACTIVE
+  EXPIRED
+  SUSPENDED
+  CANCELLED
+}
+
 enum PlanTier {
   STARTER
   PRO
