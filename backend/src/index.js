@@ -9,6 +9,7 @@ import healthRoutes from "./routes/health.js";
 import authRoutes from "./routes/auth.js";
 import organizationRoutes from "./routes/organizations.js";
 import iptvPlanRoutes from "./routes/iptv-plans.js";
+import contactRoutes from "./routes/contacts.js";
 
 const app = Fastify({
   logger: { level: env.NODE_ENV === "production" ? "info" : "debug" },
