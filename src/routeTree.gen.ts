@@ -13,8 +13,17 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppWhatsappRouteImport } from './routes/_app.whatsapp'
+import { Route as AppSettingsRouteImport } from './routes/_app.settings'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppCrmRouteImport } from './routes/_app.crm'
+import { Route as AppConversationsRouteImport } from './routes/_app.conversations'
+import { Route as AppContactsRouteImport } from './routes/_app.contacts'
+import { Route as AppBillingRouteImport } from './routes/_app.billing'
+import { Route as AppAutomationsRouteImport } from './routes/_app.automations'
+import { Route as AppAnalyticsRouteImport } from './routes/_app.analytics'
+import { Route as AppAgentsRouteImport } from './routes/_app.agents'
+import { Route as AppAdminRouteImport } from './routes/_app.admin'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -35,6 +44,16 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppWhatsappRoute = AppWhatsappRouteImport.update({
+  id: '/whatsapp',
+  path: '/whatsapp',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -45,20 +64,73 @@ const AppCrmRoute = AppCrmRouteImport.update({
   path: '/crm',
   getParentRoute: () => AppRoute,
 } as any)
+const AppConversationsRoute = AppConversationsRouteImport.update({
+  id: '/conversations',
+  path: '/conversations',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppContactsRoute = AppContactsRouteImport.update({
+  id: '/contacts',
+  path: '/contacts',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBillingRoute = AppBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAutomationsRoute = AppAutomationsRouteImport.update({
+  id: '/automations',
+  path: '/automations',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAgentsRoute = AppAgentsRouteImport.update({
+  id: '/agents',
+  path: '/agents',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAdminRoute = AppAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/admin': typeof AppAdminRoute
+  '/agents': typeof AppAgentsRoute
+  '/analytics': typeof AppAnalyticsRoute
+  '/automations': typeof AppAutomationsRoute
+  '/billing': typeof AppBillingRoute
+  '/contacts': typeof AppContactsRoute
+  '/conversations': typeof AppConversationsRoute
   '/crm': typeof AppCrmRoute
   '/dashboard': typeof AppDashboardRoute
+  '/settings': typeof AppSettingsRoute
+  '/whatsapp': typeof AppWhatsappRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/admin': typeof AppAdminRoute
+  '/agents': typeof AppAgentsRoute
+  '/analytics': typeof AppAnalyticsRoute
+  '/automations': typeof AppAutomationsRoute
+  '/billing': typeof AppBillingRoute
+  '/contacts': typeof AppContactsRoute
+  '/conversations': typeof AppConversationsRoute
   '/crm': typeof AppCrmRoute
   '/dashboard': typeof AppDashboardRoute
+  '/settings': typeof AppSettingsRoute
+  '/whatsapp': typeof AppWhatsappRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -66,22 +138,68 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/_app/admin': typeof AppAdminRoute
+  '/_app/agents': typeof AppAgentsRoute
+  '/_app/analytics': typeof AppAnalyticsRoute
+  '/_app/automations': typeof AppAutomationsRoute
+  '/_app/billing': typeof AppBillingRoute
+  '/_app/contacts': typeof AppContactsRoute
+  '/_app/conversations': typeof AppConversationsRoute
   '/_app/crm': typeof AppCrmRoute
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/settings': typeof AppSettingsRoute
+  '/_app/whatsapp': typeof AppWhatsappRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/register' | '/crm' | '/dashboard'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/admin'
+    | '/agents'
+    | '/analytics'
+    | '/automations'
+    | '/billing'
+    | '/contacts'
+    | '/conversations'
+    | '/crm'
+    | '/dashboard'
+    | '/settings'
+    | '/whatsapp'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/register' | '/crm' | '/dashboard'
+  to:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/admin'
+    | '/agents'
+    | '/analytics'
+    | '/automations'
+    | '/billing'
+    | '/contacts'
+    | '/conversations'
+    | '/crm'
+    | '/dashboard'
+    | '/settings'
+    | '/whatsapp'
   id:
     | '__root__'
     | '/'
     | '/_app'
     | '/login'
     | '/register'
+    | '/_app/admin'
+    | '/_app/agents'
+    | '/_app/analytics'
+    | '/_app/automations'
+    | '/_app/billing'
+    | '/_app/contacts'
+    | '/_app/conversations'
     | '/_app/crm'
     | '/_app/dashboard'
+    | '/_app/settings'
+    | '/_app/whatsapp'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -121,6 +239,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/whatsapp': {
+      id: '/_app/whatsapp'
+      path: '/whatsapp'
+      fullPath: '/whatsapp'
+      preLoaderRoute: typeof AppWhatsappRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/settings': {
+      id: '/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/dashboard': {
       id: '/_app/dashboard'
       path: '/dashboard'
@@ -135,17 +267,84 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCrmRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/conversations': {
+      id: '/_app/conversations'
+      path: '/conversations'
+      fullPath: '/conversations'
+      preLoaderRoute: typeof AppConversationsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/contacts': {
+      id: '/_app/contacts'
+      path: '/contacts'
+      fullPath: '/contacts'
+      preLoaderRoute: typeof AppContactsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/billing': {
+      id: '/_app/billing'
+      path: '/billing'
+      fullPath: '/billing'
+      preLoaderRoute: typeof AppBillingRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/automations': {
+      id: '/_app/automations'
+      path: '/automations'
+      fullPath: '/automations'
+      preLoaderRoute: typeof AppAutomationsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/analytics': {
+      id: '/_app/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AppAnalyticsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/agents': {
+      id: '/_app/agents'
+      path: '/agents'
+      fullPath: '/agents'
+      preLoaderRoute: typeof AppAgentsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/admin': {
+      id: '/_app/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AppAdminRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
+  AppAdminRoute: typeof AppAdminRoute
+  AppAgentsRoute: typeof AppAgentsRoute
+  AppAnalyticsRoute: typeof AppAnalyticsRoute
+  AppAutomationsRoute: typeof AppAutomationsRoute
+  AppBillingRoute: typeof AppBillingRoute
+  AppContactsRoute: typeof AppContactsRoute
+  AppConversationsRoute: typeof AppConversationsRoute
   AppCrmRoute: typeof AppCrmRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppWhatsappRoute: typeof AppWhatsappRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAdminRoute: AppAdminRoute,
+  AppAgentsRoute: AppAgentsRoute,
+  AppAnalyticsRoute: AppAnalyticsRoute,
+  AppAutomationsRoute: AppAutomationsRoute,
+  AppBillingRoute: AppBillingRoute,
+  AppContactsRoute: AppContactsRoute,
+  AppConversationsRoute: AppConversationsRoute,
   AppCrmRoute: AppCrmRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppSettingsRoute: AppSettingsRoute,
+  AppWhatsappRoute: AppWhatsappRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
@@ -159,13 +358,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
