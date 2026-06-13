@@ -293,7 +293,7 @@ function ConversationsPage() {
     <TooltipProvider delayDuration={150}>
       <div className="-m-6 flex h-[calc(100vh-3.5rem)] overflow-hidden bg-background">
         {/* LEFT — conversation list */}
-        <aside className="flex w-[340px] shrink-0 flex-col border-r border-border bg-sidebar/40">
+        <aside className="flex w-[300px] shrink-0 flex-col border-r border-border bg-sidebar/40 2xl:w-[320px]">
           <div className="space-y-3 border-b border-border px-4 py-4">
             <div className="flex items-center justify-between">
               <div>
@@ -494,7 +494,7 @@ function ConversationsPage() {
 
           {/* messages */}
           <ScrollArea className="flex-1">
-            <div className="mx-auto flex max-w-3xl flex-col gap-3 px-6 py-6">
+            <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-8 py-8 2xl:max-w-5xl">
               <div className="self-center rounded-full border border-border bg-muted/40 px-3 py-1 text-[11px] text-muted-foreground">
                 Hoje
               </div>
@@ -518,7 +518,7 @@ function ConversationsPage() {
                   >
                     <div
                       className={cn(
-                        "max-w-[78%] rounded-2xl px-4 py-2.5 text-sm shadow-sm",
+                        "max-w-[72%] rounded-2xl px-4 py-3 text-[15px] leading-relaxed shadow-sm",
                         isAI
                           ? "border border-accent/30 bg-accent/10 text-foreground"
                           : isMine
@@ -653,7 +653,7 @@ function ConversationsPage() {
         </section>
 
         {/* RIGHT — context */}
-        <aside className="hidden w-[320px] shrink-0 flex-col border-l border-border bg-sidebar/40 xl:flex">
+        <aside className="hidden w-[300px] shrink-0 flex-col border-l border-border bg-sidebar/40 lg:flex 2xl:w-[340px]">
           <ScrollArea className="flex-1">
             <div className="space-y-5 p-5">
               <div className="flex flex-col items-center text-center">
