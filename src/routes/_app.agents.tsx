@@ -468,7 +468,7 @@ function AgentEditorDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-5xl overflow-hidden p-0">
+      <DialogContent className="max-w-5xl p-0">
         <DialogHeader className="border-b border-border/60 px-6 py-4">
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
@@ -479,7 +479,7 @@ function AgentEditorDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid max-h-[70vh] grid-cols-1 overflow-hidden lg:grid-cols-[1fr_360px]">
+        <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden lg:grid-cols-[1fr_360px]">
           {/* Editor */}
           <div className="overflow-y-auto p-6">
             <Tabs defaultValue="identity" className="w-full">

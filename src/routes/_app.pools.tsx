@@ -471,7 +471,7 @@ function PoolEditorDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-4xl overflow-hidden p-0">
+      <DialogContent className="max-w-4xl p-0">
         <DialogHeader className="border-b border-border/60 px-6 py-4">
           <DialogTitle className="flex items-center gap-2">
             <Layers className="h-5 w-5 text-primary" />
@@ -482,7 +482,7 @@ function PoolEditorDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="max-h-[70vh] overflow-y-auto px-6 py-5">
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
           <Tabs defaultValue="general" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="general">Geral</TabsTrigger>
