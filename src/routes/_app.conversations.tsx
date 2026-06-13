@@ -494,7 +494,7 @@ function ConversationsPage() {
 
           {/* messages */}
           <ScrollArea className="flex-1">
-            <div className="mx-auto flex max-w-3xl flex-col gap-3 px-6 py-6">
+            <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-8 py-8 2xl:max-w-5xl">
               <div className="self-center rounded-full border border-border bg-muted/40 px-3 py-1 text-[11px] text-muted-foreground">
                 Hoje
               </div>
