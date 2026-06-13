@@ -45,6 +45,7 @@ const automation = [
 const insights = [
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Financeiro", url: "/billing", icon: CreditCard },
+  { title: "Workspace", url: "/workspace", icon: Briefcase },
   { title: "Configurações", url: "/settings", icon: Settings },
   { title: "Admin", url: "/admin", icon: ShieldCheck },
 ];
