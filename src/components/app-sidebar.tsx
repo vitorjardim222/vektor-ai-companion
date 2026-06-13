@@ -12,6 +12,7 @@ import {
   Settings,
   CreditCard,
   ShieldCheck,
+  Briefcase,
 } from "lucide-react";
 import {
   Sidebar,
