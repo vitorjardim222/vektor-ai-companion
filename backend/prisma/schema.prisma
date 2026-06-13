@@ -77,6 +77,8 @@ model Organization {
   iptvPlans         IptvPlan[]
   iptvCustomerPlans IptvCustomerPlan[]
   iptvRenewalRules  IptvRenewalRule[]
+  whatsappSessions  WhatsAppSession[]
+  whatsappEvents    WhatsAppEvent[]
 }
 
 model Membership {
