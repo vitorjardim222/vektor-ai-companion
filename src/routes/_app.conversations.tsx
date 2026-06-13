@@ -653,7 +653,7 @@ function ConversationsPage() {
         </section>
 
         {/* RIGHT — context */}
-        <aside className="hidden w-[320px] shrink-0 flex-col border-l border-border bg-sidebar/40 xl:flex">
+        <aside className="hidden w-[300px] shrink-0 flex-col border-l border-border bg-sidebar/40 lg:flex 2xl:w-[340px]">
           <ScrollArea className="flex-1">
             <div className="space-y-5 p-5">
               <div className="flex flex-col items-center text-center">
