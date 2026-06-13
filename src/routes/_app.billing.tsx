@@ -358,6 +358,9 @@ function BillingPage() {
               ))}
             </div>
           </TabsContent>
+          <TabsContent value="iptv" className="mt-0">
+            <IptvPlansTab />
+          </TabsContent>
           <TabsContent value="links" className="mt-0 space-y-2">
             {PAYMENT_LINKS.map((l) => (
               <Card key={l.id} className="border-white/5 bg-white/[0.02]">
