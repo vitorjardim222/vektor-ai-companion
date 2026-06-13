@@ -170,3 +170,64 @@ model AuditLog {
 
   @@index([organizationId, createdAt])
 }
+
+model IptvPlan {
+  id                String   @id @default(cuid())
+  organizationId    String
+  name              String
+  description       String?
+  durationDays      Int      @default(30)
+  price             Decimal  @default(0)
+  currency          String   @default("BRL")
+  connectionsLimit  Int      @default(1)
+  trialEnabled      Boolean  @default(false)
+  trialDurationHours Int     @default(0)
+  active            Boolean  @default(true)
+  sortOrder         Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  organization   Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  customerPlans  IptvCustomerPlan[]
+  renewalRules   IptvRenewalRule[]
+
+  @@index([organizationId, active, sortOrder])
+}
+
+model IptvCustomerPlan {
+  id             String                 @id @default(cuid())
+  organizationId String
+  contactId      String
+  planId         String
+  startDate      DateTime               @default(now())
+  expiresAt      DateTime
+  status         IptvCustomerPlanStatus @default(ACTIVE)
+  autoRenew      Boolean                @default(true)
+  notes          String?
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  plan         IptvPlan     @relation(fields: [planId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, status, expiresAt])
+  @@index([contactId])
+}
+
+model IptvRenewalRule {
+  id                  String   @id @default(cuid())
+  organizationId      String
+  planId              String?
+  reminderDaysBefore  Int[]    @default([7, 3, 1, 0])
+  overdueDaysAfter    Int[]    @default([1, 3, 7])
+  assignedAiPoolId    String?
+  messageTemplate     String?
+  active              Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  plan         IptvPlan?    @relation(fields: [planId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+}
