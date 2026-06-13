@@ -11,6 +11,8 @@ import organizationRoutes from "./routes/organizations.js";
 import iptvPlanRoutes from "./routes/iptv-plans.js";
 import contactRoutes from "./routes/contacts.js";
 import analyticsRoutes from "./routes/analytics.js";
+import whatsappRoutes from "./routes/whatsapp.js";
+import evolutionWebhookRoutes from "./routes/webhooks-evolution.js";
 
 const app = Fastify({
   logger: { level: env.NODE_ENV === "production" ? "info" : "debug" },
@@ -26,6 +28,8 @@ await app.register(organizationRoutes, { prefix: "/api" });
 await app.register(iptvPlanRoutes, { prefix: "/api" });
 await app.register(contactRoutes, { prefix: "/api" });
 await app.register(analyticsRoutes, { prefix: "/api" });
+await app.register(whatsappRoutes, { prefix: "/api" });
+await app.register(evolutionWebhookRoutes, { prefix: "/api" });
 
 app.get("/", async () => ({ service: "vektor-backend", status: "ok" }));
 

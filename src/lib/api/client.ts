@@ -227,3 +227,59 @@ export const analyticsApi = {
   overview: (orgId: string) =>
     api<AnalyticsOverview>(`/organizations/${orgId}/analytics/overview`),
 };
+
+// ---------- WhatsApp ----------
+export type WhatsAppStatus = "DISCONNECTED" | "CONNECTING" | "QR" | "CONNECTED" | "ERROR";
+
+export type WhatsAppSession = {
+  id: string;
+  organizationId: string;
+  name: string;
+  phoneNumber: string | null;
+  status: WhatsAppStatus;
+  evolutionSessionId: string | null;
+  qrCode: string | null;
+  lastConnectionAt: string | null;
+  lastMessageAt: string | null;
+  assignedPoolId: string | null;
+  assignedHumanId: string | null;
+  autoReconnect: boolean;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export const whatsappApi = {
+  list: (orgId: string) =>
+    api<{ sessions: WhatsAppSession[]; evolutionConfigured: boolean }>(
+      `/organizations/${orgId}/whatsapp/sessions`,
+    ),
+  create: (orgId: string, input: { name: string; phoneNumber?: string | null; autoReconnect?: boolean; assignedPoolId?: string | null; assignedHumanId?: string | null }) =>
+    api<{ session: WhatsAppSession }>(`/organizations/${orgId}/whatsapp/sessions`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    }),
+  update: (orgId: string, id: string, input: Partial<WhatsAppSession>) =>
+    api<{ session: WhatsAppSession }>(`/organizations/${orgId}/whatsapp/sessions/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    }),
+  remove: (orgId: string, id: string) =>
+    api<{ deleted: true }>(`/organizations/${orgId}/whatsapp/sessions/${id}`, { method: "DELETE" }),
+  qrCode: (orgId: string, id: string) =>
+    api<{ qrCode: string | null; status: WhatsAppStatus; configured?: boolean; error?: string }>(
+      `/organizations/${orgId}/whatsapp/sessions/${id}/qrcode`,
+    ),
+  status: (orgId: string, id: string) =>
+    api<{ session: WhatsAppSession }>(`/organizations/${orgId}/whatsapp/sessions/${id}/status`),
+  connect: (orgId: string, id: string) =>
+    api<{ qrCode: string | null; status: WhatsAppStatus }>(
+      `/organizations/${orgId}/whatsapp/sessions/${id}/connect`,
+      { method: "POST" },
+    ),
+  disconnect: (orgId: string, id: string) =>
+    api<{ session: WhatsAppSession }>(
+      `/organizations/${orgId}/whatsapp/sessions/${id}/disconnect`,
+      { method: "POST" },
+    ),
+};
