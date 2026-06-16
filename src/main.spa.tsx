@@ -11,8 +11,8 @@ import { getRouter } from "./router";
 import "./styles.css";
 
 const router = getRouter();
-// @ts-expect-error queryClient is provided via router context
-const queryClient = router.options.context.queryClient;
+const queryClient = (router.options.context as { queryClient: import("@tanstack/react-query").QueryClient }).queryClient;
+
 
 const rootEl = document.getElementById("root");
 if (!rootEl) throw new Error("#root not found");
