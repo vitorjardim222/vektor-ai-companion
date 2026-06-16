@@ -265,3 +265,103 @@ bash deploy/scripts/backup.sh
 | vektor-frontend  | 3011          | `127.0.0.1` (OpenResty `/`) |
 | vektor-backend   | 3012          | `127.0.0.1` (OpenResty `/api`) |
 | Postgres / Redis | 5432 / 6379   | nunca expostos              |
+
+---
+
+## Deploy real na VPS vps8817
+
+Procedimento exato para subir VEKTOR na VPS `vps8817.panel.icontainer.net`,
+reaproveitando a infra já existente (Postgres `ic-postgresql-aIFq`,
+Redis `ic-redis-zf84`, Evolution `ic-evolutionapi-8nZx`) sobre a rede
+Docker **`icontainer-network`**.
+
+### 1. Clonar o repositório
+
+```bash
+ssh root@vps8817
+git clone https://github.com/SUA-ORG/vektor-ai.git /opt/vektor-ai
+cd /opt/vektor-ai
+```
+
+### 2. Configurar `.env`
+
+```bash
+cp .env.production.example .env
+nano .env
+```
+
+Preencher obrigatoriamente:
+
+- `POSTGRES_PASSWORD` (senha do usuário `vektor` que será criado)
+- `DATABASE_URL` (usar a mesma senha)
+- `JWT_SECRET` e `SESSION_SECRET` (32+ chars aleatórios — `openssl rand -hex 32`)
+- `EVOLUTION_API_KEY` (chave real da Evolution já em uso)
+
+### 3. Criar database e usuário no Postgres existente
+
+Não criamos novo container — usamos o `ic-postgresql-aIFq` já rodando.
+Login admin atual: `user_mrWMXr`.
+
+```bash
+docker exec -it ic-postgresql-aIFq psql -U user_mrWMXr -d postgres -c \
+  "CREATE USER vektor WITH PASSWORD 'A_MESMA_SENHA_DO_ENV';"
+
+docker exec -it ic-postgresql-aIFq psql -U user_mrWMXr -d postgres -c \
+  "CREATE DATABASE vektor OWNER vektor;"
+```
+
+### 4. Validar a rede Docker compartilhada
+
+```bash
+docker network inspect icontainer-network >/dev/null && echo OK
+docker network inspect icontainer-network \
+  | grep -E 'ic-postgresql-aIFq|ic-redis-zf84|ic-evolutionapi-8nZx'
+```
+
+Todos os três precisam aparecer. Se algum faltar:
+
+```bash
+docker network connect icontainer-network ic-postgresql-aIFq
+docker network connect icontainer-network ic-redis-zf84
+docker network connect icontainer-network ic-evolutionapi-8nZx
+```
+
+### 5. Subir o VEKTOR
+
+```bash
+bash deploy/scripts/deploy.sh
+```
+
+O script valida portas `3011/3012`, rede, conectividade com Postgres/Redis/Evolution,
+faz build, sobe containers e roda `prisma migrate deploy`.
+
+### 6. Configurar OpenResty
+
+```bash
+cp deploy/openresty/vektor.conf \
+   /etc/icontainer/apps/openresty/openresty/conf/conf.d/vektor.conf
+
+# testar e recarregar (dentro do container OpenResty do icontainer)
+openresty -t && openresty -s reload
+```
+
+### 7. Validar `/api/health`
+
+```bash
+# direto no host
+curl -s http://127.0.0.1:3012/api/health
+
+# via OpenResty (subdomínio público da VPS)
+curl -s http://vektor.vps8817.panel.icontainer.net/api/health
+```
+
+Resposta esperada: `{"status":"ok",...}`.
+
+### 8. Atualizações futuras
+
+```bash
+cd /opt/vektor-ai && bash deploy/scripts/update.sh
+```
+
+Apenas os containers `vektor-frontend` e `vektor-backend` são reconstruídos —
+Postgres, Redis e Evolution **não são tocados**.
