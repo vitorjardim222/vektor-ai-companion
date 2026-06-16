@@ -1,15 +1,15 @@
 # =============================================================
-# VEKTOR A.I — PRODUCTION (VPS deploy)
-# Reuses existing infra on the VPS:
+# VEKTOR A.I — PRODUCTION (VPS vps8817 deploy)
+# Reuses existing infra on the VPS (icontainer-network):
 #   - PostgreSQL : ic-postgresql-aIFq:5432
 #   - Redis      : ic-redis-zf84:6379
 #   - Evolution  : http://ic-evolutionapi-8nZx:8080
 #
-# Exposes ONLY:
-#   - Frontend : 127.0.0.1:3011  (proxied by OpenResty)
-#   - Backend  : 127.0.0.1:3012  (proxied by OpenResty under /api)
+# Exposes ONLY on loopback (proxied publicly by OpenResty):
+#   - Frontend : 127.0.0.1:3011
+#   - Backend  : 127.0.0.1:3012  (under /api)
 #
-# Usage on the VPS:
+# Usage:
 #   cd /opt/vektor-ai
 #   cp .env.production.example .env
 #   docker compose -f docker-compose.prod.yml up -d --build
@@ -27,7 +27,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3011
-    # Only expose on localhost — OpenResty will proxy publicly.
+      VITE_API_BASE_URL: /api
     ports:
       - "127.0.0.1:3011:3011"
     depends_on:
@@ -38,8 +38,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - vektor
-      - shared
+      - icontainer-network
 
   vektor-backend:
     build:
@@ -60,19 +59,11 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - vektor
-      - shared
+      - icontainer-network
 
 networks:
-  vektor:
-    driver: bridge
-  # Pre-existing external network that already contains
+  # Existing external network on the VPS containing
   # ic-postgresql-aIFq, ic-redis-zf84, ic-evolutionapi-8nZx.
-  # Create once on the VPS if it doesn't exist:
-  #   docker network create shared
-  # Then attach the existing containers to it:
-  #   docker network connect shared ic-postgresql-aIFq
-  #   docker network connect shared ic-redis-zf84
-  #   docker network connect shared ic-evolutionapi-8nZx
-  shared:
+  # Create once if missing:  docker network create icontainer-network
+  icontainer-network:
     external: true
