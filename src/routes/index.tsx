@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   ArrowRight,
   Bot,
@@ -56,6 +56,8 @@ const faqs = [
 ];
 
 function Landing() {
+  const navigate = useNavigate();
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
       <div className="pointer-events-none absolute inset-0 -z-10">
@@ -73,9 +75,9 @@ function Landing() {
             <a href="#faq" className="hover:text-foreground">Dúvidas</a>
           </nav>
           <div className="flex items-center gap-2">
-            <Button asChild variant="ghost" size="sm"><Link to="/login">Entrar</Link></Button>
-            <Button asChild size="sm" className="cta-primary">
-              <Link to="/register">Começar agora <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link>
+            <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/login" })}>Entrar</Button>
+            <Button size="sm" className="cta-primary" onClick={() => navigate({ to: "/register" })}>
+              Começar agora <ArrowRight className="ml-1 h-3.5 w-3.5" />
             </Button>
           </div>
         </div>
@@ -94,11 +96,11 @@ function Landing() {
           automações — nativa multi-tenant, white-label e pronta para rodar na sua infraestrutura.
         </p>
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-          <Button asChild size="lg" className="cta-primary h-12 px-8 text-base">
-            <Link to="/register">Começar teste grátis <ArrowRight className="ml-2 h-4 w-4" /></Link>
+          <Button size="lg" className="cta-primary h-12 px-8 text-base" onClick={() => navigate({ to: "/register" })}>
+            Começar teste grátis <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
-          <Button asChild size="lg" variant="outline" className="h-12 border-border/60 bg-card/40 px-8 backdrop-blur">
-            <Link to="/login">Entrar</Link>
+          <Button size="lg" variant="outline" className="h-12 border-border/60 bg-card/40 px-8 backdrop-blur" onClick={() => navigate({ to: "/login" })}>
+            Entrar
           </Button>
         </div>
 
