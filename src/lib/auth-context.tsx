@@ -75,12 +75,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [applyMe]);
 
   useEffect(() => {
+    let active = true;
     const timeout = window.setTimeout(() => {
+      if (!active) return;
       setBackendError("Backend indisponível. Verifique a API.");
       setReady(true);
     }, AUTH_BOOT_TIMEOUT_MS);
-    refresh();
-    return () => window.clearTimeout(timeout);
+    refresh().finally(() => window.clearTimeout(timeout));
+    return () => {
+      active = false;
+      window.clearTimeout(timeout);
+    };
   }, [refresh]);
 
   const login = useCallback(
