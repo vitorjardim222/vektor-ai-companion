@@ -19,7 +19,7 @@ services:
   vektor-frontend:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
     image: vektor/frontend:prod
     container_name: vektor-frontend
     restart: unless-stopped
