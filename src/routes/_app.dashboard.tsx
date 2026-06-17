@@ -15,6 +15,14 @@ const stats = [
   { label: "Mensagens enviadas", value: "284.109", delta: "+12%", icon: Activity },
 ];
 
+const activity = [
+  { who: "Agente Aurora", what: "resolveu 24 conversas", when: "há 2min" },
+  { who: "Mariana", what: "assumiu um atendimento VIP", when: "há 12min" },
+  { who: "Automação", what: "enviou 1,2 mil follow-ups", when: "há 1h" },
+  { who: "WhatsApp #3", what: "reconectado com sucesso", when: "há 3h" },
+  { who: "Agente Nova", what: "captou 18 novos leads", when: "há 5h" },
+];
+
 function Dashboard() {
   return (
     <div className="flex flex-1 flex-col gap-6">
@@ -27,7 +35,10 @@ function Dashboard() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {stats.map((s) => (
-          <div key={s.label} className="group relative overflow-hidden rounded-2xl border border-border glass-panel p-5 transition hover:border-primary/40">
+          <div
+            key={s.label}
+            className="relative overflow-hidden rounded-2xl border border-border glass-panel p-5"
+          >
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs uppercase tracking-wider text-muted-foreground">{s.label}</p>
@@ -38,44 +49,27 @@ function Dashboard() {
                 <s.icon className="h-5 w-5" />
               </div>
             </div>
-            <div className="pointer-events-none absolute -bottom-12 -right-12 h-32 w-32 rounded-full bg-primary/20 blur-3xl opacity-0 transition group-hover:opacity-100" />
           </div>
         ))}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 rounded-2xl border border-border glass-panel p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <div>
-              <h3 className="font-display text-lg font-semibold">Engajamento</h3>
-              <p className="text-xs text-muted-foreground">Últimos 30 dias</p>
-            </div>
-          </div>
-          <div className="flex h-64 items-end gap-2">
-            {Array.from({ length: 30 }).map((_, i) => {
-              const h = 25 + Math.abs(Math.sin(i * 0.6)) * 70 + (i % 5) * 4;
-              return (
-                <div
-                  key={i}
-                  className="flex-1 rounded-t-md bg-gradient-to-t from-primary/70 to-accent/70"
-                  style={{ height: `${h}%` }}
-                />
-              );
-            })}
+          <h3 className="font-display text-lg font-semibold">Engajamento</h3>
+          <p className="text-xs text-muted-foreground">Últimos 30 dias</p>
+          <div className="mt-6 flex h-48 items-center justify-center rounded-xl border border-dashed border-border/60 text-sm text-muted-foreground">
+            Gráfico em breve
           </div>
         </div>
 
         <div className="rounded-2xl border border-border glass-panel p-6">
           <h3 className="font-display text-lg font-semibold">Atividade recente</h3>
           <ul className="mt-4 space-y-3 text-sm">
-            {[
-              { who: "Agente Aurora", what: "resolveu 24 conversas", when: "há 2min" },
-              { who: "Mariana", what: "assumiu um atendimento VIP", when: "há 12min" },
-              { who: "Automação", what: "enviou 1,2 mil follow-ups", when: "há 1h" },
-              { who: "WhatsApp #3", what: "reconectado com sucesso", when: "há 3h" },
-              { who: "Agente Nova", what: "captou 18 novos leads", when: "há 5h" },
-            ].map((a, i) => (
-              <li key={i} className="flex items-start justify-between gap-3 border-b border-border/40 pb-3 last:border-0">
+            {activity.map((a, i) => (
+              <li
+                key={i}
+                className="flex items-start justify-between gap-3 border-b border-border/40 pb-3 last:border-0"
+              >
                 <div>
                   <p className="font-medium">{a.who}</p>
                   <p className="text-xs text-muted-foreground">{a.what}</p>
