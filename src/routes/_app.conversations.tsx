@@ -40,12 +40,7 @@ import {
 } from "@/components/ui/sheet";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/conversations")({
@@ -332,22 +327,12 @@ function ConversationsPage() {
               </div>
 
               <div className="flex gap-1">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Filter className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Filtros avançados</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <UserPlus className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Nova conversa</TooltipContent>
-                </Tooltip>
+                <Button variant="ghost" size="icon" className="h-8 w-8" title="Filtros avançados" aria-label="Filtros avançados">
+                  <Filter className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8" title="Nova conversa" aria-label="Nova conversa">
+                  <UserPlus className="h-4 w-4" />
+                </Button>
               </div>
             </div>
 
@@ -489,31 +474,16 @@ function ConversationsPage() {
                 <span className="text-xs text-muted-foreground">IA</span>
                 <Switch defaultChecked={active.aiActive} className="scale-75" />
               </div>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-9 w-9">
-                    <Phone className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Ligar</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-9 w-9">
-                    <Video className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Vídeo</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-9 gap-1.5">
-                    <Users className="h-4 w-4" />
-                    Transferir
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Passar para humano</TooltipContent>
-              </Tooltip>
+              <Button variant="ghost" size="icon" className="h-9 w-9" title="Ligar" aria-label="Ligar">
+                <Phone className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-9 w-9" title="Vídeo" aria-label="Vídeo">
+                <Video className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" className="h-9 gap-1.5" title="Passar para humano" aria-label="Passar para humano">
+                <Users className="h-4 w-4" />
+                Transferir
+              </Button>
               <Sheet>
                 <SheetTrigger asChild>
                   <Button variant="outline" size="sm" className="h-9 gap-1.5 lg:hidden">
