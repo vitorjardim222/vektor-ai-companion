@@ -9,7 +9,7 @@ export default fp(async function authPlugin(fastify, opts) {
     try {
       await request.jwtVerify();
     } catch (err) {
-      reply.code(401).send({ error: "unauthorized" });
+      return reply.code(401).send({ error: "unauthorized" });
     }
   });
 });
