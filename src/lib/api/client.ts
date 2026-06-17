@@ -8,7 +8,7 @@ const TOKEN_KEY = "vektor.auth.token";
 export const API_BASE_URL =
   (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "/api";
 
-const API_TIMEOUT_MS = Number(import.meta.env.VITE_API_TIMEOUT_MS ?? 15000);
+const API_TIMEOUT_MS = Number(import.meta.env.VITE_API_TIMEOUT_MS ?? 7000);
 
 export function getAuthToken(): string | null {
   if (typeof window === "undefined") return null;
