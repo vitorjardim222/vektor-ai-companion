@@ -47,11 +47,14 @@ export default async function contactRoutes(fastify) {
         { email: { contains: q, mode: "insensitive" } },
       ];
     }
-    const contacts = await prisma.contact.findMany({
-      where,
-      orderBy: [{ lastInteractionAt: "desc" }, { createdAt: "desc" }],
-      take: 500,
-    });
+    const contacts = await prisma.$transaction(async (tx) =>
+      tx.contact.findMany({
+        where,
+        orderBy: [{ lastInteractionAt: "desc" }, { createdAt: "desc" }],
+        take: 500,
+      }),
+      { timeout: 8000 },
+    );
     return { contacts };
   });
 
