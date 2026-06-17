@@ -5,8 +5,9 @@
 
 const TOKEN_KEY = "vektor.auth.token";
 
-export const API_BASE_URL =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "/api";
+const configuredApiBaseUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim();
+
+export const API_BASE_URL = (configuredApiBaseUrl || "/api").replace(/\/+$/, "");
 
 const API_TIMEOUT_MS = Number(import.meta.env.VITE_API_TIMEOUT_MS ?? 7000);
 
