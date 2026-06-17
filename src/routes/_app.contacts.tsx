@@ -122,12 +122,14 @@ function ContactsPage() {
   const contactsQuery = useQuery({
     queryKey: ["contacts", currentOrgId],
     enabled,
+    retry: false,
     queryFn: () => contactApi.list(currentOrgId!).then((r) => r.contacts),
   });
 
   const plansQuery = useQuery({
     queryKey: ["iptv-plans", currentOrgId],
     enabled,
+    retry: false,
     queryFn: () => iptvApi.listPlans(currentOrgId!).then((r) => r.plans),
   });
 

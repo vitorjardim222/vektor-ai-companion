@@ -8,7 +8,7 @@ const TOKEN_KEY = "vektor.auth.token";
 export const API_BASE_URL =
   (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "/api";
 
-const API_TIMEOUT_MS = Number(import.meta.env.VITE_API_TIMEOUT_MS ?? 15000);
+const API_TIMEOUT_MS = Number(import.meta.env.VITE_API_TIMEOUT_MS ?? 7000);
 
 export function getAuthToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -44,9 +44,12 @@ export async function api<T = unknown>(
   const timeout = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
   init.signal?.addEventListener("abort", () => controller.abort(), { once: true });
 
-  let res: Response;
+  let res: Response | null = null;
+  let body: unknown;
   try {
     res = await fetch(`${API_BASE_URL}${path}`, { ...init, headers, signal: controller.signal });
+    const isJson = res.headers.get("content-type")?.includes("application/json");
+    body = isJson ? await res.json().catch(() => null) : await res.text();
   } catch (err) {
     if (err instanceof DOMException && err.name === "AbortError") {
       throw new ApiError(408, "request_timeout", null);
@@ -55,13 +58,16 @@ export async function api<T = unknown>(
   } finally {
     clearTimeout(timeout);
   }
-  const isJson = res.headers.get("content-type")?.includes("application/json");
-  const body = isJson ? await res.json().catch(() => null) : await res.text();
+
+  if (!res) throw new ApiError(0, "network_error", null);
   if (!res.ok) {
+    const message =
+      body && typeof body === "object" && "error" in body
+        ? String((body as { error: unknown }).error)
+        : `HTTP ${res.status}`;
     throw new ApiError(
       res.status,
-      (body && typeof body === "object" && "error" in body && String(body.error)) ||
-        `HTTP ${res.status}`,
+      message,
       body,
     );
   }
