@@ -51,7 +51,9 @@ export function RegisterScreen() {
       if (data?.token) {
         try {
           window.localStorage.setItem("vektor.auth.token", data.token);
-        } catch {}
+        } catch (storageError) {
+          console.warn("[register] token storage failed", storageError);
+        }
       }
       toast.success("Workspace criado");
       window.location.href = "/login";
@@ -90,39 +92,82 @@ export function RegisterScreen() {
           </div>
           <div className="rounded-2xl border border-border glass-panel p-8 shadow-[var(--shadow-elevated)]">
             <h1 className="font-display text-2xl font-bold">Crie sua conta</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Comece seu teste grátis de 14 dias.</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Comece seu teste grátis de 14 dias.
+            </p>
 
             <form className="mt-6 space-y-4" noValidate onSubmit={onSubmit}>
               <div className="space-y-2">
                 <Label htmlFor="name">Nome completo</Label>
-                <Input id="name" ref={nameRef} name="name" type="text" placeholder="Maria Silva" autoComplete="name" onChange={() => console.log("[register] name change")} />
+                <Input
+                  id="name"
+                  ref={nameRef}
+                  name="name"
+                  type="text"
+                  placeholder="Maria Silva"
+                  autoComplete="name"
+                  onChange={() => console.log("[register] name change")}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="company">Empresa</Label>
-                <Input id="company" ref={companyRef} name="company" type="text" placeholder="Sua empresa" autoComplete="organization" />
+                <Input
+                  id="company"
+                  ref={companyRef}
+                  name="company"
+                  type="text"
+                  placeholder="Sua empresa"
+                  autoComplete="organization"
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">E-mail</Label>
-                <Input id="email" ref={emailRef} name="email" type="email" placeholder="voce@empresa.com" autoComplete="email" />
+                <Input
+                  id="email"
+                  ref={emailRef}
+                  name="email"
+                  type="email"
+                  placeholder="voce@empresa.com"
+                  autoComplete="email"
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Senha</Label>
-                <Input id="password" ref={passwordRef} name="password" type="password" placeholder="Mínimo de 8 caracteres" autoComplete="new-password" />
+                <Input
+                  id="password"
+                  ref={passwordRef}
+                  name="password"
+                  type="password"
+                  placeholder="Mínimo de 8 caracteres"
+                  autoComplete="new-password"
+                />
               </div>
 
               {error ? (
-                <div role="alert" className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                <div
+                  role="alert"
+                  className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+                >
                   {error}
                 </div>
               ) : null}
 
               <Button type="submit" disabled={loading} className="w-full cta-primary">
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Criar workspace <ArrowRight className="ml-1.5 h-4 w-4" /></>}
+                {loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    Criar workspace <ArrowRight className="ml-1.5 h-4 w-4" />
+                  </>
+                )}
               </Button>
             </form>
 
             <p className="mt-6 text-center text-sm text-muted-foreground">
-              Já tem uma conta? <a href="/login" className="text-accent hover:underline">Entrar</a>
+              Já tem uma conta?{" "}
+              <a href="/login" className="text-accent hover:underline">
+                Entrar
+              </a>
             </p>
           </div>
         </div>
