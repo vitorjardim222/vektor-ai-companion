@@ -116,6 +116,7 @@ function ContactsPage() {
   const [tagFilter, setTagFilter] = useState<string>("all");
   const [editing, setEditing] = useState<ContactDraft | null>(null);
   const [open, setOpen] = useState(false);
+  const [loadTimedOut, setLoadTimedOut] = useState(false);
 
   const enabled = ready && isAuthenticated && !!currentOrgId;
 
@@ -132,6 +133,15 @@ function ContactsPage() {
     retry: false,
     queryFn: () => iptvApi.listPlans(currentOrgId!).then((r) => r.plans),
   });
+
+  useEffect(() => {
+    if (!enabled || !contactsQuery.isPending) {
+      setLoadTimedOut(false);
+      return;
+    }
+    const timer = window.setTimeout(() => setLoadTimedOut(true), 10000);
+    return () => window.clearTimeout(timer);
+  }, [enabled, contactsQuery.isPending, currentOrgId]);
 
   const contacts = contactsQuery.data ?? [];
   const plans = plansQuery.data ?? [];
@@ -295,14 +305,24 @@ function ContactsPage() {
 
       <div className="min-h-0 flex-1 overflow-y-auto pr-1">
         <Card className="border-white/5 bg-white/[0.02]">
-          {contactsQuery.isError ? (
+          {contactsQuery.isError || loadTimedOut ? (
             <div className="flex items-center gap-2 p-6 text-sm text-rose-300">
-              <AlertTriangle className="h-4 w-4" /> Backend indisponível. Verifique a API.
-              <Button size="sm" variant="ghost" onClick={() => contactsQuery.refetch()}>Tentar de novo</Button>
+              <AlertTriangle className="h-4 w-4" />
+              {loadTimedOut ? "A busca de contatos demorou demais. A página foi liberada." : "Backend indisponível. Verifique a API."}
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  setLoadTimedOut(false);
+                  contactsQuery.refetch();
+                }}
+              >
+                Tentar de novo
+              </Button>
             </div>
           ) : contactsQuery.isLoading ? (
             <div className="flex items-center gap-2 p-6 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" /> Carregando contatos…
+              <Loader2 className="h-4 w-4" /> Carregando contatos…
             </div>
           ) : (
             <Table>

@@ -9,7 +9,12 @@ const configuredApiBaseUrl = (import.meta.env.VITE_API_BASE_URL as string | unde
 
 export const API_BASE_URL = (configuredApiBaseUrl || "/api").replace(/\/+$/, "");
 
-const API_TIMEOUT_MS = Number(import.meta.env.VITE_API_TIMEOUT_MS ?? 7000);
+function readApiTimeoutMs() {
+  const parsed = Number(import.meta.env.VITE_API_TIMEOUT_MS);
+  return Number.isFinite(parsed) && parsed >= 1000 ? parsed : 7000;
+}
+
+const API_TIMEOUT_MS = readApiTimeoutMs();
 
 export function getAuthToken(): string | null {
   if (typeof window === "undefined") return null;
