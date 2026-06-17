@@ -183,8 +183,8 @@ function Landing() {
                 <span className="font-display text-4xl font-bold">{p.price}</span>
                 {p.price !== "Sob consulta" && <span className="text-sm text-muted-foreground">/mês</span>}
               </div>
-              <Button asChild className={`mt-6 w-full ${p.featured ? "cta-primary" : ""}`} variant={p.featured ? "default" : "outline"}>
-                <Link to="/register">Escolher {p.name}</Link>
+              <Button className={`mt-6 w-full ${p.featured ? "cta-primary" : ""}`} variant={p.featured ? "default" : "outline"} onClick={() => navigate({ to: "/register" })}>
+                Escolher {p.name}
               </Button>
               <ul className="mt-6 space-y-3 text-sm">
                 {p.features.map((feat) => (
@@ -224,8 +224,8 @@ function Landing() {
           <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
             Coloque a VEKTOR A.I no ar em minutos. Sem cartão de crédito.
           </p>
-          <Button asChild size="lg" className="cta-primary mt-8 h-12 px-8 text-base">
-            <Link to="/register">Começar teste grátis <ArrowRight className="ml-2 h-4 w-4" /></Link>
+          <Button size="lg" className="cta-primary mt-8 h-12 px-8 text-base" onClick={() => navigate({ to: "/register" })}>
+            Começar teste grátis <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
       </section>
