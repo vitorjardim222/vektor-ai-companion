@@ -33,8 +33,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [backendError, setBackendError] = useState<string | null>(null);
 
   const setCurrentOrgId = useCallback((id: string) => {
-    setCurrentOrgIdState(id);
-    if (typeof window !== "undefined") window.localStorage.setItem(ORG_KEY, id);
+    setCurrentOrgIdState((current) => (current === id ? current : id));
+    if (typeof window !== "undefined" && window.localStorage.getItem(ORG_KEY) !== id) {
+      window.localStorage.setItem(ORG_KEY, id);
+    }
   }, []);
 
   const applyMe = useCallback(
@@ -45,7 +47,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const saved = typeof window !== "undefined" ? window.localStorage.getItem(ORG_KEY) : null;
       const next = saved && orgs.some((o) => o.id === saved) ? saved : orgs[0]?.id ?? null;
       if (next) setCurrentOrgId(next);
-      else setCurrentOrgIdState(null);
+      else {
+        setCurrentOrgIdState((current) => (current === null ? current : null));
+        if (typeof window !== "undefined") window.localStorage.removeItem(ORG_KEY);
+      }
     },
     [setCurrentOrgId],
   );
