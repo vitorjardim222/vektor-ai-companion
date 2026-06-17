@@ -533,16 +533,15 @@ const SidebarMenuButton = React.forwardRef<
       isActive = false,
       variant = "default",
       size = "default",
-      tooltip,
+      tooltip: _tooltip,
       className,
       ...props
     },
     ref,
   ) => {
     const Comp = asChild ? Slot : "button";
-    const { isMobile, state } = useSidebar();
 
-    const button = (
+    return (
       <Comp
         ref={ref}
         data-sidebar="menu-button"
@@ -552,8 +551,6 @@ const SidebarMenuButton = React.forwardRef<
         {...props}
       />
     );
-
-    return button;
   },
 );
 SidebarMenuButton.displayName = "SidebarMenuButton";
