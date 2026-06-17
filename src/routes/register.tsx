@@ -47,7 +47,8 @@ function RegisterPage() {
 
     setSubmitting(true);
     try {
-      await register(payload);
+      const r = await authApi.register(payload);
+      if (r?.token) setAuthToken(r.token);
       toast.success("Workspace criado!");
       navigate({ to: "/dashboard", replace: true });
     } catch (err) {
