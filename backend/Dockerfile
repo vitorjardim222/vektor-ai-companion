@@ -17,4 +17,4 @@ RUN apk add --no-cache openssl
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 EXPOSE 4000
-CMD ["sh", "-c", "npx prisma migrate deploy && node src/index.js"]
+CMD ["sh", "-c", "npx prisma db push --accept-data-loss --skip-generate && node src/index.js"]
