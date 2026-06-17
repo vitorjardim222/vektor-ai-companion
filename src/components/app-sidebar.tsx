@@ -1,7 +1,4 @@
-import {
-  Link,
-  useRouterState,
-} from "@tanstack/react-router";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   MessagesSquare,
@@ -72,6 +69,7 @@ const insights: NavItem[] = [
 
 export function AppSidebar() {
   const pathname = useRouterState({ select: (router) => router.location.pathname });
+  const navigate = useNavigate();
   const { isMobile, setOpenMobile } = useSidebar();
   const isActive = (url: string) => pathname === url;
   const isConversations = pathname === "/conversations";
@@ -85,11 +83,25 @@ export function AppSidebar() {
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.url}>
-              <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                <Link
-                  to={item.url}
-                  preload={false}
-                  className="flex items-center gap-3"
+              <SidebarMenuButton
+                type="button"
+                isActive={isActive(item.url)}
+                className="flex items-center gap-3"
+                onClick={() => {
+                  if (pathname !== item.url) navigate({ to: item.url });
+                  if (isMobile) setOpenMobile(false);
+                }}
+                aria-label={item.title}
+              >
+                <item.icon className="h-4 w-4" />
+                <span>{item.title}</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  );
                   onClick={() => {
                     if (isMobile) setOpenMobile(false);
                   }}
