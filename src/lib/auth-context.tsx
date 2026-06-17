@@ -3,7 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { authApi, getAuthToken, setAuthToken, type AuthOrg, type AuthUser, ApiError } from "./api/client";
 
 const ORG_KEY = "vektor.auth.orgId";
-const AUTH_BOOT_TIMEOUT_MS = 15000;
+const AUTH_BOOT_TIMEOUT_MS = 7000;
 
 type AuthState = {
   ready: boolean;
