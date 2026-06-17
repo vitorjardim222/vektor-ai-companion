@@ -27,6 +27,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { BrandLogo } from "./brand-logo";
@@ -71,6 +72,7 @@ const insights: NavItem[] = [
 
 export function AppSidebar() {
   const pathname = useRouterState({ select: (router) => router.location.pathname });
+  const { isMobile, setOpenMobile } = useSidebar();
   const isActive = (url: string) => pathname === url;
   const isConversations = pathname === "/conversations";
 
@@ -84,7 +86,14 @@ export function AppSidebar() {
           {items.map((item) => (
             <SidebarMenuItem key={item.url}>
               <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                <Link to={item.url} preload={false} className="flex items-center gap-3">
+                <Link
+                  to={item.url}
+                  preload={false}
+                  className="flex items-center gap-3"
+                  onClick={() => {
+                    if (isMobile) setOpenMobile(false);
+                  }}
+                >
                   <item.icon className="h-4 w-4" />
                   <span>{item.title}</span>
                 </Link>
