@@ -40,7 +40,6 @@ import {
 } from "@/components/ui/sheet";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/conversations")({
@@ -306,7 +305,7 @@ function ConversationsPage() {
   const active = CONVERSATIONS.find((c) => c.id === activeId) ?? CONVERSATIONS[0];
 
   return (
-    <TooltipProvider delayDuration={150}>
+    <>
       <div
         className="grid min-h-0 w-full min-w-0 grid-cols-[400px_minmax(0,1fr)] overflow-hidden bg-background lg:grid-cols-[400px_minmax(0,1fr)_340px]"
         style={{ height: "calc(100dvh - 0px)", maxHeight: "calc(100dvh - 0px)" }}
@@ -643,7 +642,7 @@ function ConversationsPage() {
           <CustomerDetailsPanel active={active} />
         </aside>
       </div>
-    </TooltipProvider>
+    </>
 
   );
 }
