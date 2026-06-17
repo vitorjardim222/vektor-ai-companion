@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -93,7 +93,7 @@ function LoginPage() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Senha</Label>
-                  <Link to="/login" className="text-xs text-accent hover:underline">Esqueci a senha</Link>
+                  <button type="button" onClick={() => navigate({ to: "/login" })} className="text-xs text-accent hover:underline">Esqueci a senha</button>
                 </div>
                 <Input id="password" type="password" placeholder="••••••••" autoComplete="current-password"
                   value={password} onChange={(e) => setPassword(e.target.value)} required />
@@ -105,7 +105,7 @@ function LoginPage() {
 
             <p className="mt-6 text-center text-sm text-muted-foreground">
               Ainda não tem conta?{" "}
-              <Link to="/register" className="text-accent hover:underline">Criar agora</Link>
+              <button type="button" onClick={() => navigate({ to: "/register" })} className="text-accent hover:underline">Criar agora</button>
             </p>
           </div>
         </div>

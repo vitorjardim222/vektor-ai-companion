@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -109,6 +109,7 @@ function backendErrorMessage(err: unknown): string {
 
 function ContactsPage() {
   const { currentOrgId, isAuthenticated, ready } = useAuth();
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -380,9 +381,9 @@ function ContactsPage() {
                       <TableCell className="text-xs text-muted-foreground">{relTime(c.lastInteractionAt)}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
-                          <Button asChild size="sm" variant="ghost" className="gap-1"><Link to="/conversations"><MessageSquare className="h-3.5 w-3.5" /></Link></Button>
-                          <Button asChild size="sm" variant="ghost" className="gap-1"><Link to="/billing"><CreditCard className="h-3.5 w-3.5" /></Link></Button>
-                          <Button asChild size="sm" variant="ghost" className="gap-1"><Link to="/crm"><Kanban className="h-3.5 w-3.5" /></Link></Button>
+                          <Button size="sm" variant="ghost" className="gap-1" onClick={() => navigate({ to: "/conversations" })}><MessageSquare className="h-3.5 w-3.5" /></Button>
+                          <Button size="sm" variant="ghost" className="gap-1" onClick={() => navigate({ to: "/billing" })}><CreditCard className="h-3.5 w-3.5" /></Button>
+                          <Button size="sm" variant="ghost" className="gap-1" onClick={() => navigate({ to: "/crm" })}><Kanban className="h-3.5 w-3.5" /></Button>
                           <Button size="sm" variant="ghost" onClick={() => openEdit(c)}><Pencil className="h-3.5 w-3.5" /></Button>
                           <Button
                             size="sm" variant="ghost"
