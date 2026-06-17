@@ -3,6 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { authApi, getAuthToken, setAuthToken, type AuthOrg, type AuthUser, ApiError } from "./api/client";
 
 const ORG_KEY = "vektor.auth.orgId";
+const AUTH_BOOT_TIMEOUT_MS = 15000;
 
 type AuthState = {
   ready: boolean;
@@ -74,7 +75,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [applyMe]);
 
   useEffect(() => {
-    refresh();
+    let active = true;
+    const timeout = window.setTimeout(() => {
+      if (!active) return;
+      setBackendError("Backend indisponível. Verifique a API.");
+      setReady(true);
+    }, AUTH_BOOT_TIMEOUT_MS);
+    refresh().finally(() => window.clearTimeout(timeout));
+    return () => {
+      active = false;
+      window.clearTimeout(timeout);
+    };
   }, [refresh]);
 
   const login = useCallback(
