@@ -1,4 +1,3 @@
-import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   MessagesSquare,
@@ -51,7 +50,7 @@ const insights = [
 ];
 
 export function AppSidebar() {
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const pathname = typeof window !== "undefined" ? window.location.pathname : "/dashboard";
   const isActive = (url: string) => pathname === url;
   const isConversations = pathname === "/conversations";
 
@@ -65,10 +64,10 @@ export function AppSidebar() {
           {items.map((item) => (
             <SidebarMenuItem key={item.url}>
               <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                <Link to={item.url} className="flex items-center gap-3">
+                <a href={item.url} className="flex items-center gap-3">
                   <item.icon className="h-4 w-4" />
                   <span>{item.title}</span>
-                </Link>
+                </a>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}

@@ -156,6 +156,7 @@ function ContactsPage() {
       );
     });
   }, [contacts, search, statusFilter, tagFilter]);
+  const visibleContacts = filtered.slice(0, 100);
 
   const stats = useMemo(() => {
     const expSoon = contacts.filter((c) => {
@@ -315,7 +316,7 @@ function ContactsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.map((c) => {
+                {visibleContacts.map((c) => {
                   const expDays = c.iptvExpiresAt
                     ? Math.ceil((new Date(c.iptvExpiresAt).getTime() - Date.now()) / 86400000)
                     : null;
@@ -400,6 +401,13 @@ function ContactsPage() {
                   <TableRow>
                     <TableCell colSpan={8} className="py-10 text-center text-sm text-muted-foreground">
                       Nenhum contato encontrado.
+                    </TableCell>
+                  </TableRow>
+                )}
+                {filtered.length > visibleContacts.length && (
+                  <TableRow>
+                    <TableCell colSpan={8} className="py-4 text-center text-xs text-muted-foreground">
+                      Mostrando os 100 primeiros contatos. Use a busca ou filtros para refinar.
                     </TableCell>
                   </TableRow>
                 )}
