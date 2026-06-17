@@ -1,5 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState, type FormEvent } from "react";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+
+import { BrandLogo } from "@/components/brand-logo";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/register")({
   ssr: false,
@@ -13,18 +20,24 @@ export const Route = createFileRoute("/register")({
 });
 
 function RegisterPage() {
-  console.log("[register] render");
-  const [name, setName] = useState("");
-  const [company, setCompany] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const nameRef = useRef<HTMLInputElement>(null);
+  const companyRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
-  const onSubmit = async (e: React.FormEvent) => {
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("[register] submit");
-    setError("");
+    if (loading) return;
+
+    const name = nameRef.current?.value.trim() ?? "";
+    const company = companyRef.current?.value.trim() ?? "";
+    const email = emailRef.current?.value.trim().toLowerCase() ?? "";
+    const password = passwordRef.current?.value ?? "";
+
+    setError(null);
 
     if (!name.trim()) return setError("Informe seu nome completo.");
     if (!company.trim()) return setError("Informe o nome da empresa.");
@@ -35,18 +48,19 @@ function RegisterPage() {
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: { "content-type": "application/json", accept: "application/json" },
         body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim().toLowerCase(),
+          name,
+          email,
           password,
-          organizationName: company.trim(),
+          organizationName: company,
         }),
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setError((data && (data.message || data.error)) || `Erro HTTP ${res.status}`);
-        setLoading(false);
+        const message = (data && (data.message || data.error)) || `Erro HTTP ${res.status}`;
+        setError(message);
+        toast.error(message);
         return;
       }
       if (data?.token) {
@@ -54,96 +68,80 @@ function RegisterPage() {
           window.localStorage.setItem("vektor.auth.token", data.token);
         } catch {}
       }
+      toast.success("Workspace criado");
       window.location.href = "/login";
     } catch (err) {
       console.error("[register] fetch error", err);
-      setError("Falha de rede. Verifique a API.");
+      const message = "Falha de rede. Verifique a API.";
+      setError(message);
+      toast.error(message);
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, background: "#0a0a0a", color: "#fff" }}>
-      <div style={{ width: "100%", maxWidth: 420, border: "1px solid #222", borderRadius: 12, padding: 24, background: "#111" }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Crie sua conta</h1>
-        <p style={{ fontSize: 14, color: "#888", marginBottom: 20 }}>Comece seu teste grátis de 14 dias.</p>
+    <div className="relative grid min-h-screen overflow-hidden lg:grid-cols-2">
+      <div className="relative hidden flex-col justify-between overflow-hidden border-r border-border bg-sidebar p-10 lg:flex">
+        <div className="absolute inset-0 -z-10" style={{ background: "var(--gradient-hero)" }} />
+        <div className="absolute inset-0 -z-10 grid-bg opacity-40" />
+        <BrandLogo />
+        <div className="space-y-4">
+          <h2 className="font-display text-4xl font-bold leading-tight">
+            Automatize. Engaje. <span className="brand-gradient-text">Escale.</span>
+          </h2>
+          <p className="max-w-md text-muted-foreground">
+            A plataforma enterprise de WhatsApp, agentes de IA e automações inteligentes.
+          </p>
+        </div>
+        <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} VEKTOR A.I</p>
+      </div>
 
-        <form onSubmit={onSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <label style={{ fontSize: 13 }}>Nome completo</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => {
-              console.log("[register] name change");
-              setName(e.target.value);
-            }}
-            placeholder="Maria Silva"
-            style={inputStyle}
-          />
+      <div className="relative flex items-center justify-center p-6">
+        <div className="absolute inset-0 -z-10" style={{ background: "var(--gradient-hero)" }} />
+        <div className="w-full max-w-md">
+          <div className="mb-8 lg:hidden">
+            <BrandLogo />
+          </div>
+          <div className="rounded-2xl border border-border glass-panel p-8 shadow-[var(--shadow-elevated)]">
+            <h1 className="font-display text-2xl font-bold">Crie sua conta</h1>
+            <p className="mt-1 text-sm text-muted-foreground">Comece seu teste grátis de 14 dias.</p>
 
-          <label style={{ fontSize: 13 }}>Empresa</label>
-          <input
-            type="text"
-            value={company}
-            onChange={(e) => setCompany(e.target.value)}
-            placeholder="Sua empresa"
-            style={inputStyle}
-          />
+            <form className="mt-6 space-y-4" onSubmit={onSubmit}>
+              <div className="space-y-2">
+                <Label htmlFor="name">Nome completo</Label>
+                <Input id="name" ref={nameRef} name="name" type="text" placeholder="Maria Silva" autoComplete="name" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="company">Empresa</Label>
+                <Input id="company" ref={companyRef} name="company" type="text" placeholder="Sua empresa" autoComplete="organization" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">E-mail</Label>
+                <Input id="email" ref={emailRef} name="email" type="email" placeholder="voce@empresa.com" autoComplete="email" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Senha</Label>
+                <Input id="password" ref={passwordRef} name="password" type="password" placeholder="Mínimo de 8 caracteres" autoComplete="new-password" required minLength={8} />
+              </div>
 
-          <label style={{ fontSize: 13 }}>E-mail</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="voce@empresa.com"
-            style={inputStyle}
-          />
+              {error ? (
+                <div role="alert" className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  {error}
+                </div>
+              ) : null}
 
-          <label style={{ fontSize: 13 }}>Senha</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Mínimo de 8 caracteres"
-            style={inputStyle}
-          />
+              <Button type="submit" disabled={loading} className="w-full cta-primary">
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Criar workspace <ArrowRight className="ml-1.5 h-4 w-4" /></>}
+              </Button>
+            </form>
 
-          {error && (
-            <div style={{ color: "#f87171", fontSize: 13, marginTop: 4 }}>{error}</div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              marginTop: 8,
-              padding: "10px 16px",
-              borderRadius: 8,
-              border: "none",
-              background: loading ? "#0891b2" : "#06b6d4",
-              color: "#000",
-              fontWeight: 600,
-              cursor: loading ? "not-allowed" : "pointer",
-            }}
-          >
-            {loading ? "Criando…" : "Criar workspace"}
-          </button>
-        </form>
-
-        <p style={{ marginTop: 16, fontSize: 13, color: "#888", textAlign: "center" }}>
-          Já tem uma conta? <a href="/login" style={{ color: "#22d3ee" }}>Entrar</a>
-        </p>
+            <p className="mt-6 text-center text-sm text-muted-foreground">
+              Já tem uma conta? <a href="/login" className="text-accent hover:underline">Entrar</a>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
-
-const inputStyle: React.CSSProperties = {
-  padding: "10px 12px",
-  borderRadius: 8,
-  border: "1px solid #333",
-  background: "#0a0a0a",
-  color: "#fff",
-  fontSize: 14,
-  outline: "none",
-};
