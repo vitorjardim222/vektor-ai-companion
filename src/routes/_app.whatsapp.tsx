@@ -107,7 +107,8 @@ function WhatsAppPage() {
     queryKey: ["whatsapp", currentOrgId],
     queryFn: () => whatsappApi.list(currentOrgId!),
     enabled: !!currentOrgId,
-    refetchInterval: 5000,
+    retry: false,
+    staleTime: 30000,
   });
 
   const sessions = sessionsQuery.data?.sessions ?? [];
@@ -391,7 +392,8 @@ function QrDialog({ sessionId, onClose }: { sessionId: string | null; onClose: (
     queryKey: ["whatsapp-qr", currentOrgId, sessionId],
     queryFn: () => whatsappApi.qrCode(currentOrgId!, sessionId!),
     enabled: open && !!currentOrgId,
-    refetchInterval: 3000,
+    retry: false,
+    staleTime: 10000,
   });
 
   useEffect(() => {
