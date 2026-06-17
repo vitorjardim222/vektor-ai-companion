@@ -1,7 +1,6 @@
 import {
   Link,
   useRouterState,
-  type RegisteredRouter,
 } from "@tanstack/react-router";
 import {
   LayoutDashboard,
@@ -32,7 +31,20 @@ import {
 import { cn } from "@/lib/utils";
 import { BrandLogo } from "./brand-logo";
 
-type AppRouteTo = RegisteredRouter["routeTree"]["types"]["to"];
+type AppRouteTo =
+  | "/dashboard"
+  | "/conversations"
+  | "/contacts"
+  | "/crm"
+  | "/automations"
+  | "/agents"
+  | "/pools"
+  | "/whatsapp"
+  | "/analytics"
+  | "/billing"
+  | "/workspace"
+  | "/settings"
+  | "/admin";
 type NavItem = { title: string; url: AppRouteTo; icon: typeof LayoutDashboard };
 
 const main: NavItem[] = [
