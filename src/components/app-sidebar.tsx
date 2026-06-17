@@ -102,20 +102,6 @@ export function AppSidebar() {
       </SidebarGroupContent>
     </SidebarGroup>
   );
-                  onClick={() => {
-                    if (isMobile) setOpenMobile(false);
-                  }}
-                >
-                  <item.icon className="h-4 w-4" />
-                  <span>{item.title}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-      </SidebarGroupContent>
-    </SidebarGroup>
-  );
 
   return (
     <Sidebar
