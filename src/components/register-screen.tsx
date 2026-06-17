@@ -24,7 +24,7 @@ export function RegisterScreen() {
 
     const name = nameRef.current?.value.trim() ?? "";
     const company = companyRef.current?.value.trim() ?? "";
-    const email = nameRef.current?.form?.email?.value.trim().toLowerCase() ?? emailRef.current?.value.trim().toLowerCase() ?? "";
+    const email = emailRef.current?.value.trim().toLowerCase() ?? "";
     const password = passwordRef.current?.value ?? "";
 
     setError(null);
