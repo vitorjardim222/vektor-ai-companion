@@ -44,7 +44,7 @@ export async function api<T = unknown>(
   const timeout = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
   init.signal?.addEventListener("abort", () => controller.abort(), { once: true });
 
-  let res: Response;
+  let res: Response | null = null;
   let body: unknown;
   try {
     res = await fetch(`${API_BASE_URL}${path}`, { ...init, headers, signal: controller.signal });
@@ -59,6 +59,7 @@ export async function api<T = unknown>(
     clearTimeout(timeout);
   }
 
+  if (!res) throw new ApiError(0, "network_error", null);
   if (!res.ok) {
     const message =
       body && typeof body === "object" && "error" in body
