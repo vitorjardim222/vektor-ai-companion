@@ -60,10 +60,13 @@ export async function api<T = unknown>(
   }
 
   if (!res.ok) {
+    const message =
+      body && typeof body === "object" && "error" in body
+        ? String((body as { error: unknown }).error)
+        : `HTTP ${res.status}`;
     throw new ApiError(
       res.status,
-      (body && typeof body === "object" && "error" in body && String(body.error)) ||
-        `HTTP ${res.status}`,
+      message,
       body,
     );
   }
