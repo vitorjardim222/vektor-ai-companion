@@ -47,10 +47,13 @@ export default async function iptvPlanRoutes(fastify) {
   fastify.get("/organizations/:orgId/iptv-plans", async (request, reply) => {
     const { orgId } = request.params;
     if (!(await assertMembership(request, reply, orgId))) return;
-    const plans = await prisma.iptvPlan.findMany({
-      where: { organizationId: orgId },
-      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-    });
+    const plans = await prisma.$transaction(async (tx) =>
+      tx.iptvPlan.findMany({
+        where: { organizationId: orgId },
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      }),
+      { timeout: 8000 },
+    );
     return { plans };
   });
 
