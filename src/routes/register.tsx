@@ -7,8 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BrandLogo } from "@/components/brand-logo";
 import { BackendStatusBanner } from "@/components/backend-status-banner";
-import { useAuth } from "@/lib/auth-context";
-import { ApiError } from "@/lib/api/client";
+import { authApi, setAuthToken, ApiError } from "@/lib/api/client";
 
 export const Route = createFileRoute("/register")({
   ssr: false,
@@ -23,7 +22,6 @@ export const Route = createFileRoute("/register")({
 
 function RegisterPage() {
   const navigate = useNavigate();
-  const { register } = useAuth();
   const [name, setName] = useState("");
   const [organizationName, setOrganizationName] = useState("");
   const [email, setEmail] = useState("");
@@ -49,7 +47,8 @@ function RegisterPage() {
 
     setSubmitting(true);
     try {
-      await register(payload);
+      const r = await authApi.register(payload);
+      if (r?.token) setAuthToken(r.token);
       toast.success("Workspace criado!");
       navigate({ to: "/dashboard", replace: true });
     } catch (err) {
