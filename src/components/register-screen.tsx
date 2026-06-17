@@ -87,7 +87,7 @@ export function RegisterScreen() {
       <div className="relative hidden flex-col justify-between overflow-hidden border-r border-border bg-sidebar p-10 lg:flex">
         <div className="absolute inset-0 -z-10" style={{ background: "var(--gradient-hero)" }} />
         <div className="absolute inset-0 -z-10 grid-bg opacity-40" />
-        <BrandLogo />
+        <BrandMark />
         <div className="space-y-4">
           <h2 className="font-display text-4xl font-bold leading-tight">
             Automatize. Engaje. <span className="brand-gradient-text">Escale.</span>
@@ -103,7 +103,7 @@ export function RegisterScreen() {
         <div className="absolute inset-0 -z-10" style={{ background: "var(--gradient-hero)" }} />
         <div className="w-full max-w-md">
           <div className="mb-8 lg:hidden">
-            <BrandLogo />
+            <BrandMark />
           </div>
           <div className="rounded-2xl border border-border glass-panel p-8 shadow-[var(--shadow-elevated)]">
             <h1 className="font-display text-2xl font-bold">Crie sua conta</h1>
