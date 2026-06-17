@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   Building2,
   Users,
@@ -40,6 +40,8 @@ const SECTIONS = [
 ];
 
 function WorkspacePage() {
+  const navigate = useNavigate();
+
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 pb-12">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -49,11 +51,9 @@ function WorkspacePage() {
             Visão consolidada do seu workspace VEKTOR A.I.
           </p>
         </div>
-        <Link to="/settings">
-          <Button className="cta-primary">
-            Abrir configurações <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        </Link>
+        <Button className="cta-primary" onClick={() => navigate({ to: "/settings" })}>
+          Abrir configurações <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
       </div>
 
       <Card className="overflow-hidden border-white/10 bg-gradient-to-br from-white/[0.04] to-transparent">
@@ -83,7 +83,7 @@ function WorkspacePage() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {SECTIONS.map((s) => (
-          <Link key={s.title} to="/settings" className="group">
+          <button key={s.title} type="button" onClick={() => navigate({ to: "/settings" })} className="group text-left">
             <Card className="h-full border-white/10 transition hover:border-cyan-400/30 hover:bg-white/[0.02]">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
@@ -101,7 +101,7 @@ function WorkspacePage() {
                 </div>
               </CardContent>
             </Card>
-          </Link>
+          </button>
         ))}
       </div>
     </div>
