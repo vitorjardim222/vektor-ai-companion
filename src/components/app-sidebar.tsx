@@ -1,4 +1,9 @@
 import {
+  Link,
+  useRouterState,
+  type RegisteredRouter,
+} from "@tanstack/react-router";
+import {
   LayoutDashboard,
   MessagesSquare,
   Users,
@@ -27,21 +32,24 @@ import {
 import { cn } from "@/lib/utils";
 import { BrandLogo } from "./brand-logo";
 
-const main = [
+type AppRouteTo = RegisteredRouter["routeTree"]["types"]["to"];
+type NavItem = { title: string; url: AppRouteTo; icon: typeof LayoutDashboard };
+
+const main: NavItem[] = [
   { title: "Painel", url: "/dashboard", icon: LayoutDashboard },
   { title: "Conversas", url: "/conversations", icon: MessagesSquare },
   { title: "Contatos", url: "/contacts", icon: Users },
   { title: "CRM", url: "/crm", icon: Kanban },
 ];
 
-const automation = [
+const automation: NavItem[] = [
   { title: "Automações", url: "/automations", icon: Workflow },
   { title: "Agentes IA", url: "/agents", icon: Bot },
   { title: "Pools IA", url: "/pools", icon: Layers },
   { title: "WhatsApp", url: "/whatsapp", icon: Smartphone },
 ];
 
-const insights = [
+const insights: NavItem[] = [
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Financeiro", url: "/billing", icon: CreditCard },
   { title: "Workspace", url: "/workspace", icon: Briefcase },
@@ -50,11 +58,11 @@ const insights = [
 ];
 
 export function AppSidebar() {
-  const pathname = typeof window !== "undefined" ? window.location.pathname : "/dashboard";
+  const pathname = useRouterState({ select: (router) => router.location.pathname });
   const isActive = (url: string) => pathname === url;
   const isConversations = pathname === "/conversations";
 
-  const renderGroup = (label: string, items: typeof main) => (
+  const renderGroup = (label: string, items: NavItem[]) => (
     <SidebarGroup>
       <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-muted-foreground/70">
         {label}
@@ -64,10 +72,10 @@ export function AppSidebar() {
           {items.map((item) => (
             <SidebarMenuItem key={item.url}>
               <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                <a href={item.url} className="flex items-center gap-3">
+                <Link to={item.url} preload={false} className="flex items-center gap-3">
                   <item.icon className="h-4 w-4" />
                   <span>{item.title}</span>
-                </a>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
