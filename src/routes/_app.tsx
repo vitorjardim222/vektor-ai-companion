@@ -1,7 +1,6 @@
 import { createFileRoute, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useMemo } from "react";
 import { AlertTriangle, Loader2 } from "lucide-react";
-import { ApiError } from "@/lib/api/client";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Topbar } from "@/components/topbar";
