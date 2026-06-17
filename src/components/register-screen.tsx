@@ -2,10 +2,25 @@ import { useRef, useState, type FormEvent } from "react";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { BrandLogo } from "@/components/brand-logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+function BrandMark() {
+  return (
+    <a href="/" className="flex min-w-0 items-center gap-2">
+      <div className="relative h-8 w-8 shrink-0">
+        <div className="absolute inset-0 rounded-lg bg-[var(--gradient-brand)] blur-md opacity-60" />
+        <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--gradient-brand)] font-display text-sm font-bold text-primary-foreground">
+          V
+        </div>
+      </div>
+      <span className="truncate font-display text-base font-bold tracking-tight">
+        VEKTOR <span className="brand-gradient-text">A.I</span>
+      </span>
+    </a>
+  );
+}
 
 export function RegisterScreen() {
   console.log("[register] render");
@@ -72,7 +87,7 @@ export function RegisterScreen() {
       <div className="relative hidden flex-col justify-between overflow-hidden border-r border-border bg-sidebar p-10 lg:flex">
         <div className="absolute inset-0 -z-10" style={{ background: "var(--gradient-hero)" }} />
         <div className="absolute inset-0 -z-10 grid-bg opacity-40" />
-        <BrandLogo />
+        <BrandMark />
         <div className="space-y-4">
           <h2 className="font-display text-4xl font-bold leading-tight">
             Automatize. Engaje. <span className="brand-gradient-text">Escale.</span>
@@ -88,7 +103,7 @@ export function RegisterScreen() {
         <div className="absolute inset-0 -z-10" style={{ background: "var(--gradient-hero)" }} />
         <div className="w-full max-w-md">
           <div className="mb-8 lg:hidden">
-            <BrandLogo />
+            <BrandMark />
           </div>
           <div className="rounded-2xl border border-border glass-panel p-8 shadow-[var(--shadow-elevated)]">
             <h1 className="font-display text-2xl font-bold">Crie sua conta</h1>
