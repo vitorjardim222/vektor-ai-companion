@@ -23,10 +23,10 @@ function AppLayout() {
   );
 
   useEffect(() => {
-    if (ready && !isAuthenticated) {
+    if (ready && !isAuthenticated && !(hasToken && backendError)) {
       navigate({ to: "/login", replace: true });
     }
-  }, [ready, isAuthenticated, navigate]);
+  }, [ready, isAuthenticated, hasToken, backendError, navigate]);
 
   if (!ready || !isAuthenticated) {
     if (ready && hasToken && backendError) {
