@@ -45,8 +45,11 @@ export async function api<T = unknown>(
   init.signal?.addEventListener("abort", () => controller.abort(), { once: true });
 
   let res: Response;
+  let body: unknown;
   try {
     res = await fetch(`${API_BASE_URL}${path}`, { ...init, headers, signal: controller.signal });
+    const isJson = res.headers.get("content-type")?.includes("application/json");
+    body = isJson ? await res.json().catch(() => null) : await res.text();
   } catch (err) {
     if (err instanceof DOMException && err.name === "AbortError") {
       throw new ApiError(408, "request_timeout", null);
@@ -55,8 +58,7 @@ export async function api<T = unknown>(
   } finally {
     clearTimeout(timeout);
   }
-  const isJson = res.headers.get("content-type")?.includes("application/json");
-  const body = isJson ? await res.json().catch(() => null) : await res.text();
+
   if (!res.ok) {
     throw new ApiError(
       res.status,
