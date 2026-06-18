@@ -224,17 +224,20 @@ function ContactsPage() {
   const visibleContacts = useMemo(() => filtered.slice(0, MAX_RENDERED_CONTACTS), [filtered]);
 
   const stats = useMemo(() => {
-    const expSoon = contacts.filter((c) => {
-      if (!c.iptvExpiresAt) return false;
-      const d = (new Date(c.iptvExpiresAt).getTime() - Date.now()) / 86400000;
-      return d >= 0 && d <= 7;
-    }).length;
-    return {
-      total: contacts.length,
-      ativos: contacts.filter((c) => c.status === "ativo").length,
-      leads: contacts.filter((c) => c.status === "lead").length,
-      expSoon,
-    };
+    const now = Date.now();
+    return contacts.reduce(
+      (acc, c) => {
+        acc.total += 1;
+        if (c.status === "ativo") acc.ativos += 1;
+        if (c.status === "lead") acc.leads += 1;
+        if (c.iptvExpiresAt) {
+          const d = (new Date(c.iptvExpiresAt).getTime() - now) / 86400000;
+          if (d >= 0 && d <= 7) acc.expSoon += 1;
+        }
+        return acc;
+      },
+      { total: 0, ativos: 0, leads: 0, expSoon: 0 },
+    );
   }, [contacts]);
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["contacts", orgId] });
@@ -426,7 +429,7 @@ function ContactsPage() {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-xs">
-                            {c.name.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase()}
+                            {contactInitials(c.name)}
                           </div>
                           <div className="min-w-0">
                             <div className="truncate font-medium">{c.name}</div>
@@ -437,8 +440,8 @@ function ContactsPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge className={cn("border", STATUS_META[(c.status as ContactStatus) ?? "ativo"].className)}>
-                          {STATUS_META[(c.status as ContactStatus) ?? "ativo"].label}
+                        <Badge className={cn("border", statusMeta(c.status).className)}>
+                          {statusMeta(c.status).label}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -499,7 +502,7 @@ function ContactsPage() {
                 {filtered.length > visibleContacts.length && (
                   <TableRow>
                     <TableCell colSpan={8} className="py-4 text-center text-xs text-muted-foreground">
-                      Mostrando os 100 primeiros contatos. Use a busca ou filtros para refinar.
+                      Mostrando os {MAX_RENDERED_CONTACTS} primeiros contatos. Use a busca ou filtros para refinar.
                     </TableCell>
                   </TableRow>
                 )}
