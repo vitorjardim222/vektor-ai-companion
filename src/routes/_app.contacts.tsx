@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Users,
@@ -81,6 +81,10 @@ const POOLS = ["Vendas Pool", "Cobrança Pool", "Suporte Pool", "Renovação Poo
 const USERS = ["Lucas Almeida", "Mariana Souza", "Ricardo Tavares", "Camila Reis"];
 const SOURCES = ["WhatsApp", "Instagram", "Site", "Indicação", "Anúncio", "Manual"];
 const LEAD_STAGES = ["Novo", "Qualificado", "Proposta", "Negociação", "Ganho", "Perdido"];
+const EMPTY_CONTACTS: Contact[] = [];
+const EMPTY_PLANS: IptvPlan[] = [];
+const MAX_RENDERED_CONTACTS = 50;
+const MAX_TAG_FILTER_OPTIONS = 200;
 
 const STATUS_META: Record<ContactStatus, { label: string; className: string }> = {
   ativo: { label: "Ativo", className: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" },
@@ -105,6 +109,19 @@ function backendErrorMessage(err: unknown): string {
     if (err.status === 400) return "Dados inválidos.";
   }
   return "Backend indisponível. Verifique a API.";
+}
+
+function statusMeta(status: string) {
+  return STATUS_META[status as ContactStatus] ?? STATUS_META.ativo;
+}
+
+function contactInitials(name: string) {
+  return name
+    .split(" ")
+    .slice(0, 2)
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();
 }
 
 function ContactsPage() {
