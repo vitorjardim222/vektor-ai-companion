@@ -130,6 +130,7 @@ function ContactsPage() {
   const qc = useQueryClient();
   const orgId = currentOrgId ?? "";
   const [search, setSearch] = useState("");
+  const deferredSearch = useDeferredValue(search);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [tagFilter, setTagFilter] = useState<string>("all");
   const [editing, setEditing] = useState<ContactDraft | null>(null);
@@ -145,6 +146,7 @@ function ContactsPage() {
     staleTime: 30000,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
+    refetchInterval: false,
     queryFn: async () => {
       console.log("[contacts] loading start", { endpoint: `/api/organizations/${orgId}/contacts`, expectedPayload: "{ contacts: Contact[] }" });
       try {
@@ -170,6 +172,7 @@ function ContactsPage() {
     staleTime: 30000,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
+    refetchInterval: false,
     queryFn: () => iptvApi.listPlans(orgId).then((r) => r.plans).catch(() => []),
   });
 
@@ -187,32 +190,39 @@ function ContactsPage() {
     return () => window.clearTimeout(timer);
   }, [enabled, isFetchingContacts, orgId]);
 
-  const plans = plansQuery.data ?? [];
+  const plans = useMemo(() => plansQuery.data ?? EMPTY_PLANS, [plansQuery.data]);
+  const contacts = useMemo(() => contactsQuery.data ?? EMPTY_CONTACTS, [contactsQuery.data]);
   const planNameById = useMemo(
     () => Object.fromEntries(plans.map((p) => [p.id, p.name])),
     [plans],
   );
 
-  const allTags = useMemo(
-    () => Array.from(new Set(contacts.flatMap((c) => c.tags))).sort(),
-    [contacts],
-  );
+  const allTags = useMemo(() => {
+    const tags = new Set<string>();
+    for (const contact of contacts) {
+      for (const tag of contact.tags ?? []) {
+        tags.add(tag);
+        if (tags.size >= MAX_TAG_FILTER_OPTIONS) return Array.from(tags).sort();
+      }
+    }
+    return Array.from(tags).sort();
+  }, [contacts]);
 
   const filtered = useMemo(() => {
-    const q = search.toLowerCase();
+    const q = deferredSearch.trim().toLowerCase();
     return contacts.filter((c) => {
       if (statusFilter !== "all" && c.status !== statusFilter) return false;
-      if (tagFilter !== "all" && !c.tags.includes(tagFilter)) return false;
+      if (tagFilter !== "all" && !(c.tags ?? []).includes(tagFilter)) return false;
       if (!q) return true;
       return (
         c.name.toLowerCase().includes(q) ||
         c.phone.includes(q) ||
         (c.email ?? "").toLowerCase().includes(q) ||
-        c.tags.some((t) => t.toLowerCase().includes(q))
+        (c.tags ?? []).some((t) => t.toLowerCase().includes(q))
       );
     });
-  }, [contacts, search, statusFilter, tagFilter]);
-  const visibleContacts = filtered.slice(0, 100);
+  }, [contacts, deferredSearch, statusFilter, tagFilter]);
+  const visibleContacts = useMemo(() => filtered.slice(0, MAX_RENDERED_CONTACTS), [filtered]);
 
   const stats = useMemo(() => {
     const expSoon = contacts.filter((c) => {
