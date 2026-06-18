@@ -452,9 +452,12 @@ function ContactsPage() {
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
                           {(!c.tags || c.tags.length === 0) && (<span className="text-xs text-muted-foreground">—</span>)}
-                          {c.tags?.map((t) => (
+                          {(c.tags ?? []).slice(0, MAX_TAGS_PER_ROW).map((t) => (
                             <Badge key={t} variant="outline" className="border-white/10 text-[10px]">{t}</Badge>
                           ))}
+                          {(c.tags?.length ?? 0) > MAX_TAGS_PER_ROW && (
+                            <Badge variant="outline" className="border-white/10 text-[10px]">+{(c.tags?.length ?? 0) - MAX_TAGS_PER_ROW}</Badge>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -497,14 +500,14 @@ function ContactsPage() {
                     </TableRow>
                   );
                 })}
-                {filtered.length === 0 && (
+                {filteredResult.total === 0 && (
                   <TableRow>
                     <TableCell colSpan={8} className="py-10 text-center text-sm text-muted-foreground">
                       Nenhum contato encontrado.
                     </TableCell>
                   </TableRow>
                 )}
-                {filtered.length > visibleContacts.length && (
+                {filteredResult.total > visibleContacts.length && (
                   <TableRow>
                     <TableCell colSpan={8} className="py-4 text-center text-xs text-muted-foreground">
                       Mostrando os {MAX_RENDERED_CONTACTS} primeiros contatos. Use a busca ou filtros para refinar.
