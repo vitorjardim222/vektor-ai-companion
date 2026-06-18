@@ -23,17 +23,18 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const { login, isAuthenticated, ready } = useAuth();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { login, logout } = useAuth();
+  useRouterState({ select: (s) => s.location.pathname });
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // Sempre que a tela de login monta, limpamos qualquer sessão anterior
+  // para evitar o "vai direto" sem pedir e-mail/senha.
   useEffect(() => {
-    if (ready && isAuthenticated && pathname === "/login") {
-      navigate({ to: "/dashboard", replace: true });
-    }
-  }, [ready, isAuthenticated, pathname, navigate]);
+    logout();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
