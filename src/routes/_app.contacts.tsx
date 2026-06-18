@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Users,
@@ -81,6 +81,11 @@ const POOLS = ["Vendas Pool", "Cobrança Pool", "Suporte Pool", "Renovação Poo
 const USERS = ["Lucas Almeida", "Mariana Souza", "Ricardo Tavares", "Camila Reis"];
 const SOURCES = ["WhatsApp", "Instagram", "Site", "Indicação", "Anúncio", "Manual"];
 const LEAD_STAGES = ["Novo", "Qualificado", "Proposta", "Negociação", "Ganho", "Perdido"];
+const EMPTY_CONTACTS: Contact[] = [];
+const EMPTY_PLANS: IptvPlan[] = [];
+const MAX_RENDERED_CONTACTS = 50;
+const MAX_TAG_FILTER_OPTIONS = 200;
+const MAX_TAGS_PER_ROW = 5;
 
 const STATUS_META: Record<ContactStatus, { label: string; className: string }> = {
   ativo: { label: "Ativo", className: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" },
@@ -107,12 +112,26 @@ function backendErrorMessage(err: unknown): string {
   return "Backend indisponível. Verifique a API.";
 }
 
+function statusMeta(status: string) {
+  return STATUS_META[status as ContactStatus] ?? STATUS_META.ativo;
+}
+
+function contactInitials(name: string) {
+  return name
+    .split(" ")
+    .slice(0, 2)
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();
+}
+
 function ContactsPage() {
   const { currentOrgId, isAuthenticated, ready } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const orgId = currentOrgId ?? "";
   const [search, setSearch] = useState("");
+  const deferredSearch = useDeferredValue(search);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [tagFilter, setTagFilter] = useState<string>("all");
   const [editing, setEditing] = useState<ContactDraft | null>(null);
@@ -128,6 +147,7 @@ function ContactsPage() {
     staleTime: 30000,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
+    refetchInterval: false,
     queryFn: async () => {
       console.log("[contacts] loading start", { endpoint: `/api/organizations/${orgId}/contacts`, expectedPayload: "{ contacts: Contact[] }" });
       try {
@@ -143,8 +163,9 @@ function ContactsPage() {
     },
   });
 
-  const contacts = contactsQuery.data ?? [];
-  const shouldLoadPlans = enabled && (open || contacts.some((c) => !!c.iptvPlanId));
+  const contacts = useMemo(() => contactsQuery.data ?? EMPTY_CONTACTS, [contactsQuery.data]);
+  const hasContactIptvPlan = useMemo(() => contacts.some((c) => !!c.iptvPlanId), [contacts]);
+  const shouldLoadPlans = enabled && (open || hasContactIptvPlan);
 
   const plansQuery = useQuery({
     queryKey: ["iptv-plans", orgId],
@@ -153,6 +174,7 @@ function ContactsPage() {
     staleTime: 30000,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
+    refetchInterval: false,
     queryFn: () => iptvApi.listPlans(orgId).then((r) => r.plans).catch(() => []),
   });
 
@@ -170,45 +192,58 @@ function ContactsPage() {
     return () => window.clearTimeout(timer);
   }, [enabled, isFetchingContacts, orgId]);
 
-  const plans = plansQuery.data ?? [];
+  const plans = useMemo(() => plansQuery.data ?? EMPTY_PLANS, [plansQuery.data]);
   const planNameById = useMemo(
     () => Object.fromEntries(plans.map((p) => [p.id, p.name])),
     [plans],
   );
 
-  const allTags = useMemo(
-    () => Array.from(new Set(contacts.flatMap((c) => c.tags))).sort(),
-    [contacts],
-  );
+  const allTags = useMemo(() => {
+    const tags = new Set<string>();
+    for (const contact of contacts) {
+      for (const tag of contact.tags ?? []) {
+        tags.add(tag);
+        if (tags.size >= MAX_TAG_FILTER_OPTIONS) return Array.from(tags).sort();
+      }
+    }
+    return Array.from(tags).sort();
+  }, [contacts]);
 
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase();
-    return contacts.filter((c) => {
-      if (statusFilter !== "all" && c.status !== statusFilter) return false;
-      if (tagFilter !== "all" && !c.tags.includes(tagFilter)) return false;
-      if (!q) return true;
-      return (
+  const filteredResult = useMemo(() => {
+    const q = deferredSearch.trim().toLowerCase();
+    const items: Contact[] = [];
+    let matches = 0;
+    for (const c of contacts) {
+      if (statusFilter !== "all" && c.status !== statusFilter) continue;
+      if (tagFilter !== "all" && !(c.tags ?? []).includes(tagFilter)) continue;
+      const matchesSearch = !q ||
         c.name.toLowerCase().includes(q) ||
         c.phone.includes(q) ||
         (c.email ?? "").toLowerCase().includes(q) ||
-        c.tags.some((t) => t.toLowerCase().includes(q))
-      );
-    });
-  }, [contacts, search, statusFilter, tagFilter]);
-  const visibleContacts = filtered.slice(0, 100);
+        (c.tags ?? []).some((t) => t.toLowerCase().includes(q));
+      if (!matchesSearch) continue;
+      matches += 1;
+      if (items.length < MAX_RENDERED_CONTACTS) items.push(c);
+    }
+    return { items, total: matches };
+  }, [contacts, deferredSearch, statusFilter, tagFilter]);
+  const visibleContacts: Contact[] = filteredResult.items;
 
   const stats = useMemo(() => {
-    const expSoon = contacts.filter((c) => {
-      if (!c.iptvExpiresAt) return false;
-      const d = (new Date(c.iptvExpiresAt).getTime() - Date.now()) / 86400000;
-      return d >= 0 && d <= 7;
-    }).length;
-    return {
-      total: contacts.length,
-      ativos: contacts.filter((c) => c.status === "ativo").length,
-      leads: contacts.filter((c) => c.status === "lead").length,
-      expSoon,
-    };
+    const now = Date.now();
+    return contacts.reduce(
+      (acc, c) => {
+        acc.total += 1;
+        if (c.status === "ativo") acc.ativos += 1;
+        if (c.status === "lead") acc.leads += 1;
+        if (c.iptvExpiresAt) {
+          const d = (new Date(c.iptvExpiresAt).getTime() - now) / 86400000;
+          if (d >= 0 && d <= 7) acc.expSoon += 1;
+        }
+        return acc;
+      },
+      { total: 0, ativos: 0, leads: 0, expSoon: 0 },
+    );
   }, [contacts]);
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["contacts", orgId] });
@@ -400,7 +435,7 @@ function ContactsPage() {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-xs">
-                            {c.name.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase()}
+                            {contactInitials(c.name)}
                           </div>
                           <div className="min-w-0">
                             <div className="truncate font-medium">{c.name}</div>
@@ -411,16 +446,19 @@ function ContactsPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge className={cn("border", STATUS_META[(c.status as ContactStatus) ?? "ativo"].className)}>
-                          {STATUS_META[(c.status as ContactStatus) ?? "ativo"].label}
+                        <Badge className={cn("border", statusMeta(c.status).className)}>
+                          {statusMeta(c.status).label}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
                           {(!c.tags || c.tags.length === 0) && (<span className="text-xs text-muted-foreground">—</span>)}
-                          {c.tags?.map((t) => (
+                          {(c.tags ?? []).slice(0, MAX_TAGS_PER_ROW).map((t) => (
                             <Badge key={t} variant="outline" className="border-white/10 text-[10px]">{t}</Badge>
                           ))}
+                          {(c.tags?.length ?? 0) > MAX_TAGS_PER_ROW && (
+                            <Badge variant="outline" className="border-white/10 text-[10px]">+{(c.tags?.length ?? 0) - MAX_TAGS_PER_ROW}</Badge>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -463,17 +501,17 @@ function ContactsPage() {
                     </TableRow>
                   );
                 })}
-                {filtered.length === 0 && (
+                {filteredResult.total === 0 && (
                   <TableRow>
                     <TableCell colSpan={8} className="py-10 text-center text-sm text-muted-foreground">
                       Nenhum contato encontrado.
                     </TableCell>
                   </TableRow>
                 )}
-                {filtered.length > visibleContacts.length && (
+                {filteredResult.total > visibleContacts.length && (
                   <TableRow>
                     <TableCell colSpan={8} className="py-4 text-center text-xs text-muted-foreground">
-                      Mostrando os 100 primeiros contatos. Use a busca ou filtros para refinar.
+                      Mostrando os {MAX_RENDERED_CONTACTS} primeiros contatos. Use a busca ou filtros para refinar.
                     </TableCell>
                   </TableRow>
                 )}
@@ -528,7 +566,10 @@ function ContactDialog({
   const [draft, setDraft] = useState<ContactDraft | null>(value);
   const [tagInput, setTagInput] = useState("");
 
-  useEffect(() => { setDraft(value); setTagInput(""); }, [value]);
+  useEffect(() => {
+    setDraft((current) => (current === value ? current : value));
+    setTagInput((current) => (current === "" ? current : ""));
+  }, [value]);
 
   if (!draft) return null;
   const set = <K extends keyof ContactDraft>(k: K, v: ContactDraft[K]) =>
