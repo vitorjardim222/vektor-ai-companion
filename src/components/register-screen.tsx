@@ -23,8 +23,6 @@ function BrandMark() {
 }
 
 export function RegisterScreen() {
-  console.log("[register] render");
-
   const nameRef = useRef<HTMLInputElement>(null);
   const companyRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
@@ -34,7 +32,6 @@ export function RegisterScreen() {
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("[register] submit");
     if (loading) return;
 
     const name = nameRef.current?.value.trim() ?? "";
@@ -121,7 +118,6 @@ export function RegisterScreen() {
                   type="text"
                   placeholder="Maria Silva"
                   autoComplete="name"
-                  onChange={() => console.log("[register] name change")}
                 />
               </div>
               <div className="space-y-2">

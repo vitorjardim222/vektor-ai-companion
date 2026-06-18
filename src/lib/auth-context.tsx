@@ -5,6 +5,20 @@ import { authApi, getAuthToken, setAuthToken, type AuthOrg, type AuthUser, ApiEr
 const ORG_KEY = "vektor.auth.orgId";
 const AUTH_BOOT_TIMEOUT_MS = 7000;
 
+function sameUser(a: AuthUser | null, b: AuthUser | null) {
+  return a?.id === b?.id && a?.email === b?.email && a?.name === b?.name && a?.avatarUrl === b?.avatarUrl;
+}
+
+function sameOrganizations(a: AuthOrg[], b: AuthOrg[]) {
+  return (
+    a.length === b.length &&
+    a.every((org, index) => {
+      const next = b[index];
+      return next && org.id === next.id && org.name === next.name && org.slug === next.slug && org.role === next.role;
+    })
+  );
+}
+
 type AuthState = {
   ready: boolean;
   loading: boolean;
@@ -41,9 +55,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const applyMe = useCallback(
     (data: { user: AuthUser | null; organizations?: AuthOrg[] }) => {
-      setUser(data.user);
+      setUser((current) => (sameUser(current, data.user) ? current : data.user));
       const orgs = data.organizations ?? [];
-      setOrganizations(orgs);
+      setOrganizations((current) => (sameOrganizations(current, orgs) ? current : orgs));
       const saved = typeof window !== "undefined" ? window.localStorage.getItem(ORG_KEY) : null;
       const next = saved && orgs.some((o) => o.id === saved) ? saved : orgs[0]?.id ?? null;
       if (next) setCurrentOrgId(next);
@@ -57,8 +71,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     if (!getAuthToken()) {
-      setUser(null);
-      setOrganizations([]);
+      setUser((current) => (current === null ? current : null));
+      setOrganizations((current) => (current.length === 0 ? current : []));
       setReady(true);
       return;
     }
@@ -69,8 +83,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
         setAuthToken(null);
-        setUser(null);
-        setOrganizations([]);
+        setUser((current) => (current === null ? current : null));
+        setOrganizations((current) => (current.length === 0 ? current : []));
       } else {
         setBackendError("Backend indisponível. Verifique a API.");
       }

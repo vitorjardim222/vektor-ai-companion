@@ -868,44 +868,48 @@ function planToApi(p: IptvPlanRow): Partial<IptvPlan> {
 function IptvPlansTab() {
   const { currentOrgId, ready, isAuthenticated } = useAuth();
   const qc = useQueryClient();
+  const orgId = currentOrgId ?? "";
   const [editing, setEditing] = useState<IptvPlanRow | null>(null);
   const [open, setOpen] = useState(false);
 
-  const enabled = ready && isAuthenticated && !!currentOrgId;
+  const enabled = ready && isAuthenticated && !!orgId;
 
   const plansQuery = useQuery({
-    queryKey: ["iptv-plans", currentOrgId],
+    queryKey: ["iptv-plans", orgId],
     enabled,
-    queryFn: () => iptvApi.listPlans(currentOrgId!).then((r) => r.plans.map(planFromApi)),
+    staleTime: 30000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    queryFn: () => iptvApi.listPlans(orgId).then((r) => r.plans.map(planFromApi)),
   });
 
   const plans = plansQuery.data ?? [];
   const sorted = useMemo(() => [...plans].sort((a, b) => a.sortOrder - b.sortOrder), [plans]);
 
-  const invalidate = () => qc.invalidateQueries({ queryKey: ["iptv-plans", currentOrgId] });
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["iptv-plans", orgId] });
 
   const createMut = useMutation({
-    mutationFn: (p: IptvPlanRow) => iptvApi.createPlan(currentOrgId!, planToApi(p)),
+    mutationFn: (p: IptvPlanRow) => iptvApi.createPlan(orgId, planToApi(p)),
     onSuccess: () => { toast.success("Plano criado."); setOpen(false); setEditing(null); invalidate(); },
     onError: (err) => toast.error(backendErrorMessage(err)),
   });
 
   const updateMut = useMutation({
     mutationFn: ({ id, p }: { id: string; p: IptvPlanRow }) =>
-      iptvApi.updatePlan(currentOrgId!, id, planToApi(p)),
+      iptvApi.updatePlan(orgId, id, planToApi(p)),
     onSuccess: () => { toast.success("Plano atualizado."); setOpen(false); setEditing(null); invalidate(); },
     onError: (err) => toast.error(backendErrorMessage(err)),
   });
 
   const deleteMut = useMutation({
-    mutationFn: (id: string) => iptvApi.deletePlan(currentOrgId!, id),
+    mutationFn: (id: string) => iptvApi.deletePlan(orgId, id),
     onSuccess: () => { toast.success("Plano removido."); invalidate(); },
     onError: (err) => toast.error(backendErrorMessage(err)),
   });
 
   const toggleMut = useMutation({
     mutationFn: ({ id, active }: { id: string; active: boolean }) =>
-      iptvApi.updatePlan(currentOrgId!, id, { active }),
+      iptvApi.updatePlan(orgId, id, { active }),
     onSuccess: () => invalidate(),
     onError: (err) => toast.error(backendErrorMessage(err)),
   });
@@ -1041,9 +1045,8 @@ function IptvPlanDialog({
 }) {
   const [draft, setDraft] = useState<IptvPlanRow | null>(value);
 
-  // Sync when opening with a different value
-  useMemo(() => {
-    setDraft(value);
+  useEffect(() => {
+    setDraft((current) => (current === value || current?.id === value?.id ? current : value));
   }, [value]);
 
   if (!draft) return null;
