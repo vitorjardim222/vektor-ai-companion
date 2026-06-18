@@ -224,7 +224,7 @@ function ContactsPage() {
 
   const updateMut = useMutation({
     mutationFn: ({ id, input }: { id: string; input: ContactDraft }) =>
-      contactApi.update(currentOrgId!, id, input as Partial<Contact>),
+      contactApi.update(orgId, id, input as Partial<Contact>),
     onSuccess: () => {
       toast.success("Contato atualizado.");
       setOpen(false);
@@ -235,7 +235,7 @@ function ContactsPage() {
   });
 
   const deleteMut = useMutation({
-    mutationFn: (id: string) => contactApi.remove(currentOrgId!, id),
+    mutationFn: (id: string) => contactApi.remove(orgId, id),
     onSuccess: () => {
       toast.success("Contato removido.");
       invalidate();
