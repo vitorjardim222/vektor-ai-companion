@@ -20,21 +20,15 @@ if (window.location.pathname === "/register") {
     </>,
   );
 } else {
-  const [{ getRouter }, { RouterProvider }, { QueryClientProvider }] = await Promise.all([
+  const [{ getRouter }, { RouterProvider }] = await Promise.all([
     import("./router"),
     import("@tanstack/react-router"),
-    import("@tanstack/react-query"),
   ]);
   const router = getRouter();
-  const queryClient = (
-    router.options.context as { queryClient: import("@tanstack/react-query").QueryClient }
-  ).queryClient;
 
   createRoot(rootEl).render(
     <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-      </QueryClientProvider>
+      <RouterProvider router={router} />
     </StrictMode>,
   );
 }

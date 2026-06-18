@@ -111,6 +111,7 @@ function ContactsPage() {
   const { currentOrgId, isAuthenticated, ready } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const orgId = currentOrgId ?? "";
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [tagFilter, setTagFilter] = useState<string>("all");
@@ -118,16 +119,19 @@ function ContactsPage() {
   const [open, setOpen] = useState(false);
   const [loadTimedOut, setLoadTimedOut] = useState(false);
 
-  const enabled = ready && isAuthenticated && !!currentOrgId;
+  const enabled = ready && isAuthenticated && !!orgId;
 
   const contactsQuery = useQuery({
-    queryKey: ["contacts", currentOrgId],
+    queryKey: ["contacts", orgId],
     enabled,
     retry: false,
+    staleTime: 30000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
     queryFn: async () => {
-      console.log("[contacts] loading start", { orgId: currentOrgId });
+      console.log("[contacts] loading start", { endpoint: `/api/organizations/${orgId}/contacts`, expectedPayload: "{ contacts: Contact[] }" });
       try {
-        const r = await contactApi.list(currentOrgId!);
+        const r = await contactApi.list(orgId);
         console.log("[contacts] success", { count: r.contacts?.length ?? 0 });
         return r.contacts ?? [];
       } catch (err) {
@@ -140,25 +144,28 @@ function ContactsPage() {
   });
 
   const plansQuery = useQuery({
-    queryKey: ["iptv-plans", currentOrgId],
+    queryKey: ["iptv-plans", orgId],
     enabled,
     retry: false,
-    queryFn: () => iptvApi.listPlans(currentOrgId!).then((r) => r.plans).catch(() => []),
+    staleTime: 30000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    queryFn: () => iptvApi.listPlans(orgId).then((r) => r.plans).catch(() => []),
   });
 
   const isFetchingContacts = contactsQuery.isFetching;
 
   useEffect(() => {
     if (!enabled || !isFetchingContacts) {
-      setLoadTimedOut(false);
+      setLoadTimedOut((current) => (current ? false : current));
       return;
     }
     const timer = window.setTimeout(() => {
       console.warn("[contacts] timeout — liberando UI");
-      setLoadTimedOut(true);
+      setLoadTimedOut((current) => (current ? current : true));
     }, 10000);
     return () => window.clearTimeout(timer);
-  }, [enabled, isFetchingContacts, currentOrgId]);
+  }, [enabled, isFetchingContacts, orgId]);
 
   const contacts = contactsQuery.data ?? [];
   const plans = plansQuery.data ?? [];
@@ -202,10 +209,10 @@ function ContactsPage() {
     };
   }, [contacts]);
 
-  const invalidate = () => qc.invalidateQueries({ queryKey: ["contacts", currentOrgId] });
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["contacts", orgId] });
 
   const createMut = useMutation({
-    mutationFn: (input: ContactDraft) => contactApi.create(currentOrgId!, input as Partial<Contact>),
+    mutationFn: (input: ContactDraft) => contactApi.create(orgId, input as Partial<Contact>),
     onSuccess: () => {
       toast.success("Contato criado.");
       setOpen(false);

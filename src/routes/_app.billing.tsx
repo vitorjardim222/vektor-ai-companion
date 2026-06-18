@@ -1041,9 +1041,8 @@ function IptvPlanDialog({
 }) {
   const [draft, setDraft] = useState<IptvPlanRow | null>(value);
 
-  // Sync when opening with a different value
-  useMemo(() => {
-    setDraft(value);
+  useEffect(() => {
+    setDraft((current) => (current === value || current?.id === value?.id ? current : value));
   }, [value]);
 
   if (!draft) return null;
