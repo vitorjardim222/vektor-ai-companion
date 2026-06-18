@@ -322,10 +322,19 @@ function ContactsPage() {
 
       <div className="min-h-0 flex-1 overflow-y-auto pr-1">
         <Card className="border-white/5 bg-white/[0.02]">
-          {contactsQuery.isError || loadTimedOut ? (
+          {!enabled ? (
+            <div className="flex items-center gap-2 p-6 text-sm text-muted-foreground">
+              <AlertTriangle className="h-4 w-4" />
+              {ready && !isAuthenticated
+                ? "Faça login para ver seus contatos."
+                : "Nenhuma organização ativa selecionada."}
+            </div>
+          ) : contactsQuery.isError || loadTimedOut ? (
             <div className="flex items-center gap-2 p-6 text-sm text-rose-300">
               <AlertTriangle className="h-4 w-4" />
-              {loadTimedOut ? "A busca de contatos demorou demais. A página foi liberada." : "Backend indisponível. Verifique a API."}
+              {loadTimedOut
+                ? "A busca de contatos demorou demais. Tente novamente."
+                : backendErrorMessage(contactsQuery.error)}
               <Button
                 size="sm"
                 variant="ghost"
@@ -334,12 +343,20 @@ function ContactsPage() {
                   contactsQuery.refetch();
                 }}
               >
-                Tentar de novo
+                Tentar novamente
               </Button>
             </div>
-          ) : contactsQuery.isLoading ? (
+          ) : contactsQuery.isFetching && contacts.length === 0 ? (
             <div className="flex items-center gap-2 p-6 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4" /> Carregando contatos…
+              <Loader2 className="h-4 w-4 animate-spin" /> Carregando contatos…
+            </div>
+          ) : contacts.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 p-10 text-sm text-muted-foreground">
+              <Users className="h-6 w-6 opacity-60" />
+              Nenhum contato cadastrado ainda.
+              <Button size="sm" onClick={openNew} className="gap-1">
+                <Plus className="h-4 w-4" /> Adicionar contato
+              </Button>
             </div>
           ) : (
             <Table>
