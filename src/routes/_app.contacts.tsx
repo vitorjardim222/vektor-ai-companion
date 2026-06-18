@@ -85,6 +85,7 @@ const EMPTY_CONTACTS: Contact[] = [];
 const EMPTY_PLANS: IptvPlan[] = [];
 const MAX_RENDERED_CONTACTS = 50;
 const MAX_TAG_FILTER_OPTIONS = 200;
+const MAX_TAGS_PER_ROW = 5;
 
 const STATUS_META: Record<ContactStatus, { label: string; className: string }> = {
   ativo: { label: "Ativo", className: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" },
@@ -207,21 +208,25 @@ function ContactsPage() {
     return Array.from(tags).sort();
   }, [contacts]);
 
-  const filtered = useMemo(() => {
+  const filteredResult = useMemo(() => {
     const q = deferredSearch.trim().toLowerCase();
-    return contacts.filter((c) => {
+    const items: Contact[] = [];
+    let matches = 0;
+    for (const c of contacts) {
       if (statusFilter !== "all" && c.status !== statusFilter) return false;
       if (tagFilter !== "all" && !(c.tags ?? []).includes(tagFilter)) return false;
-      if (!q) return true;
-      return (
+      const matchesSearch = !q ||
         c.name.toLowerCase().includes(q) ||
         c.phone.includes(q) ||
         (c.email ?? "").toLowerCase().includes(q) ||
-        (c.tags ?? []).some((t) => t.toLowerCase().includes(q))
-      );
-    });
+        (c.tags ?? []).some((t) => t.toLowerCase().includes(q));
+      if (!matchesSearch) continue;
+      matches += 1;
+      if (items.length < MAX_RENDERED_CONTACTS) items.push(c);
+    }
+    return { items, total: matches };
   }, [contacts, deferredSearch, statusFilter, tagFilter]);
-  const visibleContacts = useMemo(() => filtered.slice(0, MAX_RENDERED_CONTACTS), [filtered]);
+  const visibleContacts = filteredResult.items;
 
   const stats = useMemo(() => {
     const now = Date.now();
