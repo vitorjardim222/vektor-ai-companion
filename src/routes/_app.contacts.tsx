@@ -164,7 +164,8 @@ function ContactsPage() {
   });
 
   const contacts = useMemo(() => contactsQuery.data ?? EMPTY_CONTACTS, [contactsQuery.data]);
-  const shouldLoadPlans = enabled && (open || contacts.some((c) => !!c.iptvPlanId));
+  const hasContactIptvPlan = useMemo(() => contacts.some((c) => !!c.iptvPlanId), [contacts]);
+  const shouldLoadPlans = enabled && (open || hasContactIptvPlan);
 
   const plansQuery = useQuery({
     queryKey: ["iptv-plans", orgId],
@@ -565,7 +566,10 @@ function ContactDialog({
   const [draft, setDraft] = useState<ContactDraft | null>(value);
   const [tagInput, setTagInput] = useState("");
 
-  useEffect(() => { setDraft(value); setTagInput(""); }, [value]);
+  useEffect(() => {
+    setDraft((current) => (current === value ? current : value));
+    setTagInput((current) => (current === "" ? current : ""));
+  }, [value]);
 
   if (!draft) return null;
   const set = <K extends keyof ContactDraft>(k: K, v: ContactDraft[K]) =>
