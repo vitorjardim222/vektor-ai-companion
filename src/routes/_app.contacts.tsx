@@ -143,9 +143,12 @@ function ContactsPage() {
     },
   });
 
+  const contacts = contactsQuery.data ?? [];
+  const shouldLoadPlans = enabled && (open || contacts.some((c) => !!c.iptvPlanId));
+
   const plansQuery = useQuery({
     queryKey: ["iptv-plans", orgId],
-    enabled,
+    enabled: shouldLoadPlans,
     retry: false,
     staleTime: 30000,
     refetchOnWindowFocus: false,
@@ -167,7 +170,6 @@ function ContactsPage() {
     return () => window.clearTimeout(timer);
   }, [enabled, isFetchingContacts, orgId]);
 
-  const contacts = contactsQuery.data ?? [];
   const plans = plansQuery.data ?? [];
   const planNameById = useMemo(
     () => Object.fromEntries(plans.map((p) => [p.id, p.name])),
