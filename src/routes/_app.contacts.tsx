@@ -124,24 +124,41 @@ function ContactsPage() {
     queryKey: ["contacts", currentOrgId],
     enabled,
     retry: false,
-    queryFn: () => contactApi.list(currentOrgId!).then((r) => r.contacts),
+    queryFn: async () => {
+      console.log("[contacts] loading start", { orgId: currentOrgId });
+      try {
+        const r = await contactApi.list(currentOrgId!);
+        console.log("[contacts] success", { count: r.contacts?.length ?? 0 });
+        return r.contacts ?? [];
+      } catch (err) {
+        console.error("[contacts] error", err);
+        throw err;
+      } finally {
+        console.log("[contacts] finally");
+      }
+    },
   });
 
   const plansQuery = useQuery({
     queryKey: ["iptv-plans", currentOrgId],
     enabled,
     retry: false,
-    queryFn: () => iptvApi.listPlans(currentOrgId!).then((r) => r.plans),
+    queryFn: () => iptvApi.listPlans(currentOrgId!).then((r) => r.plans).catch(() => []),
   });
 
+  const isFetchingContacts = contactsQuery.isFetching;
+
   useEffect(() => {
-    if (!enabled || !contactsQuery.isPending) {
+    if (!enabled || !isFetchingContacts) {
       setLoadTimedOut(false);
       return;
     }
-    const timer = window.setTimeout(() => setLoadTimedOut(true), 10000);
+    const timer = window.setTimeout(() => {
+      console.warn("[contacts] timeout — liberando UI");
+      setLoadTimedOut(true);
+    }, 10000);
     return () => window.clearTimeout(timer);
-  }, [enabled, contactsQuery.isPending, currentOrgId]);
+  }, [enabled, isFetchingContacts, currentOrgId]);
 
   const contacts = contactsQuery.data ?? [];
   const plans = plansQuery.data ?? [];
