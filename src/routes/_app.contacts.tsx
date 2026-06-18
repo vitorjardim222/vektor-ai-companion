@@ -213,8 +213,8 @@ function ContactsPage() {
     const items: Contact[] = [];
     let matches = 0;
     for (const c of contacts) {
-      if (statusFilter !== "all" && c.status !== statusFilter) return false;
-      if (tagFilter !== "all" && !(c.tags ?? []).includes(tagFilter)) return false;
+      if (statusFilter !== "all" && c.status !== statusFilter) continue;
+      if (tagFilter !== "all" && !(c.tags ?? []).includes(tagFilter)) continue;
       const matchesSearch = !q ||
         c.name.toLowerCase().includes(q) ||
         c.phone.includes(q) ||
@@ -226,7 +226,7 @@ function ContactsPage() {
     }
     return { items, total: matches };
   }, [contacts, deferredSearch, statusFilter, tagFilter]);
-  const visibleContacts = filteredResult.items;
+  const visibleContacts: Contact[] = filteredResult.items;
 
   const stats = useMemo(() => {
     const now = Date.now();
