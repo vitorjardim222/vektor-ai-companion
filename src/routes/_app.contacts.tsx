@@ -162,7 +162,7 @@ function ContactsPage() {
     },
   });
 
-  const contacts = contactsQuery.data ?? [];
+  const contacts = useMemo(() => contactsQuery.data ?? EMPTY_CONTACTS, [contactsQuery.data]);
   const shouldLoadPlans = enabled && (open || contacts.some((c) => !!c.iptvPlanId));
 
   const plansQuery = useQuery({
@@ -191,7 +191,6 @@ function ContactsPage() {
   }, [enabled, isFetchingContacts, orgId]);
 
   const plans = useMemo(() => plansQuery.data ?? EMPTY_PLANS, [plansQuery.data]);
-  const contacts = useMemo(() => contactsQuery.data ?? EMPTY_CONTACTS, [contactsQuery.data]);
   const planNameById = useMemo(
     () => Object.fromEntries(plans.map((p) => [p.id, p.name])),
     [plans],
